@@ -16,7 +16,7 @@ var webpackOutput = {
     library: 'torsten',
     libraryTarget: 'umd',
 
-    filename: 'torsten-client.js'
+    filename: 'torsten.js'
 };
 
 var webpackNode = {
@@ -67,7 +67,7 @@ gulp.task('client:webpack:bundle', ['client:typescript'], () => {
                 library: 'torsten',
                 libraryTarget: 'umd',
 
-                filename: 'torsten-client.bundle.js'
+                filename: 'torsten.bundle.js'
             },
             target: function (compiler) {
                 compiler.apply(
