@@ -5,7 +5,7 @@ import {
 import { extend, isObject, IPromise } from 'orange';
 import { isString, isFormData, isReadableStream, isNode, isBuffer } from './utils';
 import { FileInfo } from './file-info';
-import { createError } from './error';
+import { createError , TorstenJSONError} from './error';
 
 import * as request from './request'
 import { HttpMethod, Response } from 'orange.request';
@@ -70,6 +70,8 @@ export class TorstenClient implements IClient {
             })
     }
 
+
+
     stat(path: string, options: GetOptions = {}): IPromise<IFileInfo> {
 
         let url = this._toUrl(path);
@@ -77,7 +79,7 @@ export class TorstenClient implements IClient {
             progress: options.progress,
             params: { stat: true },
             token: this._token
-        }).then(res => {
+        }).then(getResponse).then(res => {
             return res.json<{ data: IFileInfo }>();
         }).then(i => new FileInfo(i.data))
 
@@ -88,7 +90,7 @@ export class TorstenClient implements IClient {
             progress: options.progress,
             params: { stat: true, id: id },
             token: this._token
-        }).then(res => {
+        }).then(getResponse).then(res => {
             return res.json<{ data: IFileInfo }>();
         }).then(i => new FileInfo(i.data))
     }
@@ -100,14 +102,14 @@ export class TorstenClient implements IClient {
         }))
 
         var getResponse = (res: Response) => {
-           
+
             if (!res.isValid) {
                 if (/text\/plain/.test(res.headers.get('Content-Type'))) {
-                    return res.text().then( t => {
+                    return res.text().then(t => {
                         return Promise.reject(new Error(t));
                     })
                 } else if (/application\/json/.test(res.headers.get('Content-Type'))) {
-                    return res.json().then( json => {
+                    return res.json().then(json => {
                         return Promise.reject(new Error(<any>json));
                     })
                 }
@@ -130,7 +132,7 @@ export class TorstenClient implements IClient {
         }))
             .then<any>(info => {
 
-                let r: request.TorstenRequest = { 
+                let r: request.TorstenRequest = {
                     progress: options.progress,
                     token: this.token
                 };
@@ -160,4 +162,21 @@ export class TorstenClient implements IClient {
         return this._options.endpoint + path;
     }
 
+}
+
+
+function getResponse(res: Response): IPromise<Response> {
+
+    if (!res.isValid) {
+        if (/text\/plain/.test(res.headers.get('Content-Type'))) {
+            return res.text().then(t => {
+                return Promise.reject(new Error(t));
+            })
+        } else if (/application\/json/.test(res.headers.get('Content-Type'))) {
+            return res.json().then(json => {
+                return Promise.reject<Response>(new TorstenJSONError("response",json));
+            })
+        }
+    }
+    return Promise.resolve(res); //.json<{ data: FileInfo[]; message: string; }>();
 }

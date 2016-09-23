@@ -126,7 +126,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                progress: options.progress,
 	                params: { stat: true },
 	                token: this._token
-	            }).then(function (res) {
+	            }).then(getResponse).then(function (res) {
 	                return res.json();
 	            }).then(function (i) {
 	                return new file_info_1.FileInfo(i.data);
@@ -141,7 +141,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                progress: options.progress,
 	                params: { stat: true, id: id },
 	                token: this._token
-	            }).then(function (res) {
+	            }).then(getResponse).then(function (res) {
 	                return res.json();
 	            }).then(function (i) {
 	                return new file_info_1.FileInfo(i.data);
@@ -238,6 +238,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	}();
 
 	exports.TorstenClient = TorstenClient;
+	function getResponse(res) {
+	    if (!res.isValid) {
+	        if (/text\/plain/.test(res.headers.get('Content-Type'))) {
+	            return res.text().then(function (t) {
+	                return Promise.reject(new Error(t));
+	            });
+	        } else if (/application\/json/.test(res.headers.get('Content-Type'))) {
+	            return res.json().then(function (json) {
+	                return Promise.reject(new error_1.TorstenJSONError("response", json));
+	            });
+	        }
+	    }
+	    return Promise.resolve(res); //.json<{ data: FileInfo[]; message: string; }>();
+	}
 
 /***/ },
 /* 2 */
@@ -467,6 +481,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	}(Error);
 
 	exports.TorstenClientError = TorstenClientError;
+
+	var TorstenJSONError = function (_TorstenClientError) {
+	    _inherits(TorstenJSONError, _TorstenClientError);
+
+	    function TorstenJSONError(message, json) {
+	        _classCallCheck(this, TorstenJSONError);
+
+	        var _this2 = _possibleConstructorReturn(this, (TorstenJSONError.__proto__ || Object.getPrototypeOf(TorstenJSONError)).call(this, message));
+
+	        _this2.json = json;
+	        return _this2;
+	    }
+
+	    return TorstenJSONError;
+	}(TorstenClientError);
+
+	exports.TorstenJSONError = TorstenJSONError;
 	function createError(msg) {
 	    return new TorstenClientError(msg);
 	}
@@ -486,7 +517,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (r.headers) req.header(r.headers);
 	    req.header("User-Agent", "torsten-client/0.0.1");
 	    req.header("Authorization", "Bearer " + r.token);
-	    console.log("Bearer " + r.token);
 	    return req.downloadProgress(r.progress).end(r.data).then(function (res) {
 	        return res;
 	    });

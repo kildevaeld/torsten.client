@@ -17,7 +17,7 @@ export function request(method: HttpMethod, url: string, r: TorstenRequest): IPr
     req.header("User-Agent", "torsten-client/0.0.1")
     
     req.header("Authorization", "Bearer " + r.token)
-    console.log("Bearer " + r.token)
+    
     return req.downloadProgress(r.progress)
         .end(r.data).then((res) => {
             return res;
