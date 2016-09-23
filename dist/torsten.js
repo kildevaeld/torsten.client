@@ -124,7 +124,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var url = this._toUrl(path);
 	            return request.request(orange_request_1.HttpMethod.GET, url, {
 	                progress: options.progress,
-	                params: { stat: true }
+	                params: { stat: true },
+	                token: this._token
 	            }).then(function (res) {
 	                return res.json();
 	            }).then(function (i) {
@@ -138,7 +139,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            return request.request(orange_request_1.HttpMethod.GET, this.endpoint, {
 	                progress: options.progress,
-	                params: { stat: true, id: id }
+	                params: { stat: true, id: id },
+	                token: this._token
 	            }).then(function (res) {
 	                return res.json();
 	            }).then(function (i) {
@@ -150,9 +152,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function list(path) {
 	            var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
-	            var req = request.request(orange_request_1.HttpMethod.GET, this._toUrl(path), options);
-	            return req.then(function (res) {
+	            var req = request.request(orange_request_1.HttpMethod.GET, this._toUrl(path), orange_1.extend({}, options, {
+	                token: this._token
+	            }));
+	            var getResponse = function getResponse(res) {
+	                if (!res.isValid) {
+	                    if (/text\/plain/.test(res.headers.get('Content-Type'))) {
+	                        return res.text().then(function (t) {
+	                            return Promise.reject(new Error(t));
+	                        });
+	                    } else if (/application\/json/.test(res.headers.get('Content-Type'))) {
+	                        return res.json().then(function (json) {
+	                            return Promise.reject(new Error(json));
+	                        });
+	                    }
+	                }
 	                return res.json();
+	            };
+	            return req.then(function (res) {
+	                return getResponse(res);
 	            }).then(function (infos) {
 	                if (infos.message != 'ok') return [];
 	                return infos.data.map(function (i) {
@@ -167,7 +185,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
-	            return this.stat(path, options).then(function (info) {
+	            return this.stat(path, orange_1.extend({}, options, {
+	                token: this._token
+	            })).then(function (info) {
 	                var r = { progress: options.progress };
 	                if (options.thumbnail) {
 	                    r.params = r.params || {};
@@ -194,6 +214,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	                path = "/" + path;
 	            }
 	            return this._options.endpoint + path;
+	        }
+	    }, {
+	        key: 'token',
+	        set: function set(token) {
+	            this._token = token;
 	        }
 	    }, {
 	        key: 'endpoint',
@@ -410,13 +435,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var orange_request_1 = __webpack_require__(7);
 	var utils_1 = __webpack_require__(3);
-	function request(method, url) {
-	    var r = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
-
+	function request(method, url, r) {
 	    var req = new orange_request_1.HttpRequest(method, url);
 	    if (r.params) req.params(r.params);
 	    if (r.headers) req.header(r.headers);
 	    req.header("User-Agent", "torsten-client/0.0.1");
+	    req.header("Authorization", "Bearer " + r.token);
+	    console.log("Bearer " + r.token);
 	    return req.downloadProgress(r.progress).end(r.data).then(function (res) {
 	        return res;
 	    });

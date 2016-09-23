@@ -7,8 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="dist/css/file-gallery.css" rel="stylesheet" type="text/css" />
 
-    <script src="dist/torsten-client.bundle.js"></script>
-    <script src="dist/torsten-client-gui.bundle.js"></script>
+    <script src="dist/torsten.bundle.js"></script>
     <style>
         div.progress {
             position: relative;
@@ -63,16 +62,11 @@
             endpoint: 'http://localhost:3000'
         })
 
-        let gallery = new torsten.views.GalleryView({
-            client: client,
-            showDirectories: true
-        });
+        client.token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJnaWQiOiJhMjQxYWQ4NS1iMDM2LTQ5YTQtYmIzNi0yNjVkYzM1OGU4ZTEiLCJ1aWQiOiJjYzcwMGQ4Ni04YmMzLTRjODAtOGQxZS1lMDg3MjdkZTE0OWYifQ.dDlnxtNVBFegJLNExsmyej8oKl76Why8eso-MGbg5PE"
 
-        var body = document.body;
-
-        body.appendChild(gallery.render().el);
-
-        gallery.root = "/"
+        client.list('/').then(function (list) {
+            console.log(list)
+        })
     </script>
 
 </body>

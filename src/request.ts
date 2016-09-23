@@ -4,8 +4,11 @@ import {IPromise} from 'orange'
 import {Request} from './types';
 import {isString, isBuffer, isFormData, isObject, isFile, isReadableStream} from './utils';
 
+export interface TorstenRequest extends Request {
+    token: string;
+}
 
-export function request(method: HttpMethod, url: string, r: Request = {}): IPromise<Response> {
+export function request(method: HttpMethod, url: string, r: TorstenRequest): IPromise<Response> {
     let req = new HttpRequest(method, url);
     
     if (r.params) req.params(r.params);
@@ -13,12 +16,13 @@ export function request(method: HttpMethod, url: string, r: Request = {}): IProm
 
     req.header("User-Agent", "torsten-client/0.0.1")
     
+    req.header("Authorization", "Bearer " + r.token)
+    console.log("Bearer " + r.token)
     return req.downloadProgress(r.progress)
         .end(r.data).then((res) => {
             return res;
         });
 }
-
 
 export function upload(url: string, r: Request, data): IPromise<Response> {
     

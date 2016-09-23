@@ -3,6 +3,8 @@ import { IPromise } from 'orange';
 export declare class TorstenClient implements IClient {
     private _options;
     constructor(options: TorstenClientOptions);
+    private _token;
+    token: string;
     endpoint: string;
     create(path: string, data: any, options?: CreateOptions): IPromise<IFileInfo>;
     stat(path: string, options?: GetOptions): IPromise<IFileInfo>;
