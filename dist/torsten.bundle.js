@@ -188,12 +188,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return this.stat(path, orange_1.extend({}, options, {
 	                token: this._token
 	            })).then(function (info) {
-	                var r = { progress: options.progress };
+	                var r = {
+	                    progress: options.progress,
+	                    token: _this.token
+	                };
 	                if (options.thumbnail) {
 	                    r.params = r.params || {};
 	                    r.params.thumbnail = true;
 	                }
-	                if (utils_1.isNode && options.stream) {}
 	                return request.request(orange_request_1.HttpMethod.GET, _this._toUrl(path), r).then(function (r) {
 	                    return r.blob();
 	                });
@@ -203,7 +205,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        key: 'remove',
 	        value: function remove(path) {
 	            var url = this._toUrl(path);
-	            return request.request(orange_request_1.HttpMethod.DELETE, url, {}).then(function (res) {
+	            return request.request(orange_request_1.HttpMethod.DELETE, url, {
+	                token: this.token
+	            }).then(function (res) {
 	                return res.json();
 	            });
 	        }
@@ -219,6 +223,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        key: 'token',
 	        set: function set(token) {
 	            this._token = token;
+	        },
+	        get: function get() {
+	            return this._token;
 	        }
 	    }, {
 	        key: 'endpoint',
@@ -1449,6 +1456,44 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    path_1.dir = dir;
 	})(path = exports.path || (exports.path = {}));
+	var filemode;
+	(function (filemode) {
+	    function toString(m) {
+	        var str = "dalTLDpSugct";
+	        var buf = new Array(32);
+	        //var buf [32]byte // Mode is uint32.
+	        var w = 0;
+	        for (var i = 0, ii = str.length; i < ii; i++) {
+	            var c = str[i];
+	            if ((m & 1 << 32 - 1 - i) != 0) {
+	                buf[w] = c;
+	                w++;
+	            }
+	        }
+	        /*for i, c := range str {
+	            if m&(1<<uint(32-1-i)) != 0 {
+	                buf[w] = byte(c)
+	                w++
+	            }
+	        }*/
+	        if (w == 0) {
+	            buf[w] = '-';
+	            w++;
+	        }
+	        var rwx = "rwxrwxrwx";
+	        for (var _i = 0, _ii = rwx.length; _i < _ii; _i++) {
+	            var _c = str[_i];
+	            if ((m & 1 << 9 - 1 - _i) != 0) {
+	                buf[w] = _c;
+	            } else {
+	                buf[w] = '-';
+	            }
+	            w++;
+	        }
+	        return buf.slice(0, w).join('');
+	    }
+	    filemode.toString = toString;
+	})(filemode = exports.filemode || (exports.filemode = {}));
 
 /***/ },
 /* 11 */

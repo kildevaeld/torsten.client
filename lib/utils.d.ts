@@ -21,3 +21,6 @@ export declare module path {
     function base(path: string): string;
     function dir(path: string): string;
 }
+export declare module filemode {
+    function toString(m: number): string;
+}

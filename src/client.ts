@@ -41,6 +41,10 @@ export class TorstenClient implements IClient {
         this._token = token;
     }
 
+    get token(): string {
+        return this._token;
+    }
+
     get endpoint() {
         return this._options.endpoint;
     }
@@ -96,6 +100,7 @@ export class TorstenClient implements IClient {
         }))
 
         var getResponse = (res: Response) => {
+           
             if (!res.isValid) {
                 if (/text\/plain/.test(res.headers.get('Content-Type'))) {
                     return res.text().then( t => {
@@ -125,21 +130,13 @@ export class TorstenClient implements IClient {
         }))
             .then<any>(info => {
 
-                let r: Request = { progress: options.progress };
+                let r: request.TorstenRequest = { 
+                    progress: options.progress,
+                    token: this.token
+                };
                 if (options.thumbnail) {
                     r.params = r.params || {};
                     r.params.thumbnail = true;
-                }
-
-                if (isNode && options.stream) {
-                    /*let req = request.get(this._toUrl(path))
-
-                    if (options.progress) {
-                        req.on('progress', options.progress);
-                    }
-                    // if the pipe function is'nt called immediately
-                    // request downloads the data to a buffer
-                    return req.pipe(require('./stream').stream());*/
                 }
 
                 return request.request(HttpMethod.GET, this._toUrl(path), r)
@@ -150,11 +147,11 @@ export class TorstenClient implements IClient {
 
     remove(path: string): IPromise<TorstenResponse> {
         let url = this._toUrl(path)
-        return request.request(HttpMethod.DELETE, url, {})
+        return request.request(HttpMethod.DELETE, url, {
+            token: this.token
+        })
             .then(res => res.json())
     }
-
-
 
     private _toUrl(path: string) {
         if (path.substr(0, 1) != "/") {
@@ -163,27 +160,4 @@ export class TorstenClient implements IClient {
         return this._options.endpoint + path;
     }
 
-
-    /*
-    private _doStream(path: string, r: Request): Promise<request.Response> {
-        let url = this._toUrl(path);
-        let req = request.post(path)
-        if (r.params) req.query(r.params);
-        if (r.headers) req.set(r.headers);
-
-        if (r.mime) {
-            req.set('Content-Type', r.mime);
-        }
-        if (r.size) {
-            req.set('Content-Length', "" + r.size);
-        }
-
-        if (r.progress) {
-            req.on('upload', r.progress);
-        }
-
-        r.data.pipe(req);
-        return req;
-    }
-    */
 }

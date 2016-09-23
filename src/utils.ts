@@ -44,20 +44,20 @@ export function fileReaderReady<T>(reader: FileReader): IPromise<T> {
     });
 }
 
-export function readBlobAsArrayBuffer(blob:Blob): IPromise<ArrayBuffer> {
+export function readBlobAsArrayBuffer(blob: Blob): IPromise<ArrayBuffer> {
     var reader = new FileReader()
     reader.readAsArrayBuffer(blob);
     return fileReaderReady(reader)
 }
 
-export function readBlobAsText(blob:Blob): IPromise<string> {
+export function readBlobAsText(blob: Blob): IPromise<string> {
     var reader = new FileReader()
     reader.readAsText(blob)
-    
+
     return fileReaderReady<string>(reader)
 }
 
-export function readBlobAsDataURL(blob:Blob): IPromise<string> {
+export function readBlobAsDataURL(blob: Blob): IPromise<string> {
     var reader = new FileReader()
     reader.readAsDataURL(blob);
     return fileReaderReady<string>(reader);
@@ -79,16 +79,57 @@ export module path {
         return DELIMITER + out.join(DELIMITER);
     }
 
-    export function base(path:string) {
+    export function base(path: string) {
         if (!path) return "";
         let split = path.split(DELIMITER)
-        return split[split.length-1];
+        return split[split.length - 1];
     }
 
-    export function dir(path:string) {
+    export function dir(path: string) {
         if (!path) return "";
         let split = path.split(DELIMITER)
         split.pop();
         return join(...split);
+    }
+}
+
+export module filemode {
+    export function toString(m: number) {
+        const str = "dalTLDpSugct"
+        var buf = new Array(32);
+        //var buf [32]byte // Mode is uint32.
+        let w = 0
+
+        for (let i = 0, ii = str.length; i < ii; i++) {
+            let c = str[i];
+            if ((m & (1 << (32 - 1 - i))) != 0) {
+                buf[w] = c;
+                w++
+            }
+        }
+        /*for i, c := range str {
+            if m&(1<<uint(32-1-i)) != 0 {
+                buf[w] = byte(c)
+                w++
+            }
+        }*/
+        if (w == 0) {
+            buf[w] = '-'
+            w++
+        }
+        const rwx = "rwxrwxrwx"
+
+        for (let i = 0, ii = rwx.length; i < ii; i++) {
+            let c = str[i];
+            if ((m & (1 << (9 - 1 - i))) != 0) {
+                buf[w] = c
+            } else {
+                buf[w] = '-'
+            }
+            w++
+        }
+        
+
+        return buf.slice(0,w).join('');
     }
 }
