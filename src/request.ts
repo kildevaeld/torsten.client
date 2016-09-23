@@ -35,10 +35,10 @@ export function upload(url: string, r: Request, data): IPromise<Response> {
     req.header("User-Agent", "torsten-client/0.0.1")
 
     if (isString(data)) {
-        req.header('Content-Length', data.length)
+        req.header('Content-Length', "" + data.length)
         mimeType = r.mime || "text/plain";
     } else if (isBuffer(data)) {
-        req.header('Content-Length', data.length);
+        req.header('Content-Length', "" + data.length);
     } else if (isObject(data) && !isFile(data) && !isFormData(data) && !isReadableStream(data)) {
         try {
             data = JSON.stringify(data);

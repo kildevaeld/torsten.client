@@ -10,7 +10,7 @@ export declare class TorstenClient implements IClient {
     stat(path: string, options?: GetOptions): IPromise<IFileInfo>;
     statById(id: string, options?: GetOptions): IPromise<IFileInfo>;
     list(path: string, options?: ListOptions): IPromise<IFileInfo[]>;
-    open(path: string, options?: OpenOptions): IPromise<Blob>;
+    open(path: string, options?: OpenOptions): IPromise<any>;
     remove(path: string): IPromise<TorstenResponse>;
     private _toUrl(path);
 }

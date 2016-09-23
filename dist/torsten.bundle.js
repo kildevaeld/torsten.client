@@ -103,11 +103,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            if (data == null) return Promise.reject(error_1.createError("no data"));
 	            var req = orange_1.extend({}, options);
-	            var promise = void 0;
-	            if (utils_1.isNode && utils_1.isReadableStream(data)) {} else {
-	                promise = request.upload(this._toUrl(path), req, data);
-	            }
-	            return promise.then(function (res) {
+	            return request.upload(this._toUrl(path), req, data).then(function (res) {
 	                return res.json();
 	            }).then(function (json) {
 	                if (json.message != "ok") {
@@ -197,7 +193,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    r.params.thumbnail = true;
 	                }
 	                return request.request(orange_request_1.HttpMethod.GET, _this._toUrl(path), r).then(function (r) {
-	                    return r.blob();
+	                    return utils_1.isNode ? r.stream() : r.blob();
 	                });
 	            });
 	        }
@@ -207,7 +203,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var url = this._toUrl(path);
 	            return request.request(orange_request_1.HttpMethod.DELETE, url, {
 	                token: this.token
-	            }).then(function (res) {
+	            }).then(getResponse).then(function (res) {
 	                return res.json();
 	            });
 	        }
@@ -250,7 +246,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            });
 	        }
 	    }
-	    return Promise.resolve(res); //.json<{ data: FileInfo[]; message: string; }>();
+	    return Promise.resolve(res);
 	}
 
 /***/ },
@@ -1632,10 +1628,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var mimeType = void 0;
 	    req.header("User-Agent", "torsten-client/0.0.1");
 	    if (utils_1.isString(data)) {
-	        req.header('Content-Length', data.length);
+	        req.header('Content-Length', "" + data.length);
 	        mimeType = r.mime || "text/plain";
 	    } else if (utils_1.isBuffer(data)) {
-	        req.header('Content-Length', data.length);
+	        req.header('Content-Length', "" + data.length);
 	    } else if (utils_1.isObject(data) && !utils_1.isFile(data) && !utils_1.isFormData(data) && !utils_1.isReadableStream(data)) {
 	        try {
 	            data = JSON.stringify(data);

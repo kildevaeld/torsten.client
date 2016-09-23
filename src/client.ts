@@ -20,6 +20,10 @@ interface Request {
     progress?: (e: ProgressEvent) => void;
 }
 
+interface IMessage {
+    message: string;
+    data?: any;
+}
 
 
 function validateConfig(options: TorstenClientOptions) {
@@ -54,14 +58,8 @@ export class TorstenClient implements IClient {
 
         let req: Request = extend({}, options);
 
-        let promise: IPromise<any>;
-        if (isNode && isReadableStream(data)) {
-            //promise = this._doStream(path, req);
-        } else {
-            promise = request.upload(this._toUrl(path), req, data);
-        }
-
-        return promise.then(res => res.json())
+        return request.upload(this._toUrl(path), req, data)
+        .then(res => res.json<IMessage>())
             .then(json => {
                 if (json.message != "ok") {
                     throw createError("invalid response");
@@ -126,7 +124,7 @@ export class TorstenClient implements IClient {
     }
 
 
-    open(path: string, options: OpenOptions = {}): IPromise<Blob> {
+    open(path: string, options: OpenOptions = {}): IPromise<any> {
         return this.stat(path, extend({}, options, {
             token: this._token
         }))
@@ -142,7 +140,7 @@ export class TorstenClient implements IClient {
                 }
 
                 return request.request(HttpMethod.GET, this._toUrl(path), r)
-                    .then(r => r.blob())
+                    .then(r => isNode ? r.stream() : r.blob())
 
             });
     }
@@ -151,7 +149,7 @@ export class TorstenClient implements IClient {
         let url = this._toUrl(path)
         return request.request(HttpMethod.DELETE, url, {
             token: this.token
-        })
+        }).then(getResponse)
             .then(res => res.json())
     }
 
@@ -174,9 +172,10 @@ function getResponse(res: Response): IPromise<Response> {
             })
         } else if (/application\/json/.test(res.headers.get('Content-Type'))) {
             return res.json().then(json => {
+            
                 return Promise.reject<Response>(new TorstenJSONError("response",json));
             })
         }
     }
-    return Promise.resolve(res); //.json<{ data: FileInfo[]; message: string; }>();
+    return Promise.resolve(res);
 }
