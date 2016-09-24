@@ -5,4 +5,4 @@ export interface TorstenRequest extends Request {
     token: string;
 }
 export declare function request(method: HttpMethod, url: string, r: TorstenRequest): IPromise<Response>;
-export declare function upload(url: string, r: Request, data: any): IPromise<Response>;
+export declare function upload(url: string, r: TorstenRequest, data: any): IPromise<Response>;

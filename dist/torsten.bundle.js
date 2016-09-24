@@ -105,7 +105,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var req = orange_1.extend({}, options, {
 	                token: this.token
 	            });
-	            return request.upload(this._toUrl(path), req, data).then(function (res) {
+	            return request.upload(this._toUrl(path), req, data).then(getResponse).then(function (res) {
 	                return res.json();
 	            }).then(function (json) {
 	                if (json.message != "ok") {
@@ -1633,6 +1633,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (utils_1.isNode) {
 	        req.header("User-Agent", "torsten-client/0.0.1");
 	    }
+	    req.header("Authorization", "Bearer " + r.token);
 	    if (utils_1.isString(data)) {
 	        req.header('Content-Length', "" + data.length);
 	        mimeType = r.mime || "text/plain";

@@ -27,7 +27,7 @@ export function request(method: HttpMethod, url: string, r: TorstenRequest): IPr
         });
 }
 
-export function upload(url: string, r: Request, data): IPromise<Response> {
+export function upload(url: string, r: TorstenRequest, data): IPromise<Response> {
     
     let req = new HttpRequest(HttpMethod.POST, url);
     req.uploadProgress(r.progress)
@@ -39,6 +39,7 @@ export function upload(url: string, r: Request, data): IPromise<Response> {
         req.header("User-Agent", "torsten-client/0.0.1")
     }
     
+    req.header("Authorization", "Bearer " + r.token)
 
     if (isString(data)) {
         req.header('Content-Length', "" + data.length)
