@@ -2,7 +2,7 @@
 import {HttpRequest, HttpMethod, BodyType, Response} from 'orange.request'
 import {IPromise} from 'orange'
 import {Request} from './types';
-import {isString, isBuffer, isFormData, isObject, isFile, isReadableStream} from './utils';
+import {isString, isBuffer, isFormData, isObject, isFile, isReadableStream, isNode} from './utils';
 
 export interface TorstenRequest extends Request {
     token: string;
@@ -14,7 +14,10 @@ export function request(method: HttpMethod, url: string, r: TorstenRequest): IPr
     if (r.params) req.params(r.params);
     if (r.headers) req.header(r.headers);
 
-    req.header("User-Agent", "torsten-client/0.0.1")
+    if (isNode) {
+        req.header("User-Agent", "torsten-client/0.0.1")
+    }
+    
     
     req.header("Authorization", "Bearer " + r.token)
     
@@ -31,8 +34,11 @@ export function upload(url: string, r: Request, data): IPromise<Response> {
     if (r.params) req.params(r.params);
     if (r.headers) req.header(r.headers);
 
-    let mimeType
-    req.header("User-Agent", "torsten-client/0.0.1")
+    let mimeType;
+    if (isNode) {
+        req.header("User-Agent", "torsten-client/0.0.1")
+    }
+    
 
     if (isString(data)) {
         req.header('Content-Length', "" + data.length)

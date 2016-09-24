@@ -1613,7 +1613,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var req = new orange_request_1.HttpRequest(method, url);
 	    if (r.params) req.params(r.params);
 	    if (r.headers) req.header(r.headers);
-	    req.header("User-Agent", "torsten-client/0.0.1");
+	    if (utils_1.isNode) {
+	        req.header("User-Agent", "torsten-client/0.0.1");
+	    }
 	    req.header("Authorization", "Bearer " + r.token);
 	    return req.downloadProgress(r.progress).end(r.data).then(function (res) {
 	        return res;
@@ -1626,7 +1628,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (r.params) req.params(r.params);
 	    if (r.headers) req.header(r.headers);
 	    var mimeType = void 0;
-	    req.header("User-Agent", "torsten-client/0.0.1");
+	    if (utils_1.isNode) {
+	        req.header("User-Agent", "torsten-client/0.0.1");
+	    }
 	    if (utils_1.isString(data)) {
 	        req.header('Content-Length', "" + data.length);
 	        mimeType = r.mime || "text/plain";
