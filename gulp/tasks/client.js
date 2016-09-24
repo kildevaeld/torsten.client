@@ -55,7 +55,12 @@ gulp.task('client:webpack', ['client:typescript'], () => {
 
             externals: {
                 "orange": "orange",
-                "orange.request": ['orange', 'request']
+                "orange.request": {
+                    root: ['orange','request'],
+                    commonjs2: 'orange.request',
+                    commonjs: 'orange.request',
+                    amd: 'orange.request'
+                }
             }
         })).pipe(gulp.dest('dist'))
 });

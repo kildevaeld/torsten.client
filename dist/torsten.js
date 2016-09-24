@@ -1,12 +1,12 @@
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory(require("orange"), require(undefined));
+		module.exports = factory(require("orange"), require("orange.request"));
 	else if(typeof define === 'function' && define.amd)
-		define(["orange", ], factory);
+		define(["orange", "orange.request"], factory);
 	else if(typeof exports === 'object')
-		exports["torsten"] = factory(require("orange"), require(undefined));
+		exports["torsten"] = factory(require("orange"), require("orange.request"));
 	else
-		root["torsten"] = factory(root["orange"], root[undefined]);
+		root["torsten"] = factory(root["orange"], root["orange"]["request"]);
 })(this, function(__WEBPACK_EXTERNAL_MODULE_2__, __WEBPACK_EXTERNAL_MODULE_7__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
