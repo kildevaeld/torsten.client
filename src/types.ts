@@ -8,6 +8,7 @@ export interface TorstenResponse {
 
 export interface IClient {
     endpoint: string;
+    token: string;
     create(path:string, data:any, options:CreateOptions): IPromise<IFileInfo>;
     open(path: string, options:OpenOptions): IPromise<Blob>;
     stat(path:string, options?:GetOptions): IPromise<IFileInfo>;

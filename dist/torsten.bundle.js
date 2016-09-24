@@ -102,7 +102,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
 	            if (data == null) return Promise.reject(error_1.createError("no data"));
-	            var req = orange_1.extend({}, options);
+	            var req = orange_1.extend({}, options, {
+	                token: this.token
+	            });
 	            return request.upload(this._toUrl(path), req, data).then(function (res) {
 	                return res.json();
 	            }).then(function (json) {
