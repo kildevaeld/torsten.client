@@ -6,9 +6,9 @@ let client = new Client({
     endpoint: "http://localhost:3000"
 });
 
-client.token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI1MmRmNDg3MS1kMjRjLTQ0NTUtOTMzMy00MDUwZjIwN2RhMTciLCJnaWQiOlsiZGUxODRjNmItMjM5YS00ZmEwLThhYWEtYWY1MjA0NjUxZGZkIiwiZGQwNzIzZDQtYWY5Ny00NTUxLTkwZjEtYTI2NDdiZmM2YjJmIl0sImlhdCI6MTQ3NDY2OTI1OH0.cNnL5tXZuiNhvGke2njF6SxGe6lNhd6R4NRh2h0_FPU"
+client.token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiIzZTQxODM3NC1mYjhiLTRjYTQtOGI4MC1iNGM0MmZhNGQwMjkiLCJnaWQiOlsiOWVmYjVmMjMtMTlmMC00ZjYzLTgwMTUtYzY2NWZlNzRiMDQxIiwiN2JiZTI4OTktNTVkZS00NDk1LTllZjItZWYxYjkyYzVkMWNhIl0sImlhdCI6MTQ3NDc0Mzc1N30.2m_-NnZ01W-AoYY1z8OPVw-0z9MslJwQG_5nTHVx0Vk"
 client.list('/images').then((list) => {
-    //console.log(list)
+    console.log(list)
 }).catch(e => {
     console.log(e)
 })

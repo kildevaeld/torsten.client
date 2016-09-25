@@ -58,9 +58,12 @@ export class TorstenClient implements IClient {
     create(path: string, data: any, options: CreateOptions = {}): IPromise<IFileInfo> {
         if (data == null) return Promise.reject<IFileInfo>(createError("no data"))
 
-        let req: Request = extend({}, options);
+        let req = extend({}, options, {
+            token: this.token
+        });
 
         return request.upload(this._toUrl(path), req, data)
+        .then(getResponse)
         .then(res => res.json<IMessage>())
             .then(json => {
                 if (json.message != "ok") {

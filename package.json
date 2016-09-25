@@ -1,6 +1,6 @@
 {
   "name": "torsten",
-  "version": "0.0.9",
+  "version": "0.0.11",
   "description": "",
   "main": "lib/index.js",
   "scripts": {
@@ -50,7 +50,7 @@
     "registry": "github",
     "dependencies": {
       "orange": "github:kildevaeld/orange@master",
-      "orange.request": "github:kildevaeld/orange@master"
+      "orange.request": "github:kildevaeld/orange.request@master"
     }
   }
 }

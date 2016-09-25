@@ -105,8 +105,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
 	            if (data == null) return Promise.reject(error_1.createError("no data"));
-	            var req = orange_1.extend({}, options);
-	            return request.upload(this._toUrl(path), req, data).then(function (res) {
+	            var req = orange_1.extend({}, options, {
+	                token: this.token
+	            });
+	            return request.upload(this._toUrl(path), req, data).then(getResponse).then(function (res) {
 	                return res.json();
 	            }).then(function (json) {
 	                if (json.message != "ok") {
@@ -1634,6 +1636,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (utils_1.isNode) {
 	        req.header("User-Agent", "torsten-client/0.0.1");
 	    }
+	    req.header("Authorization", "Bearer " + r.token);
 	    if (utils_1.isString(data)) {
 	        req.header('Content-Length', "" + data.length);
 	        mimeType = r.mime || "text/plain";
