@@ -57,4 +57,5 @@ export interface RemoveOptions {
 }
 export interface TorstenClientOptions {
     endpoint: string;
+    token: string;
 }

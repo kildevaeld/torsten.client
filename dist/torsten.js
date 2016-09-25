@@ -86,7 +86,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	var error_1 = __webpack_require__(5);
 	var request = __webpack_require__(6);
 	var orange_request_1 = __webpack_require__(7);
-	function validateConfig(options) {}
+	function validateConfig(options) {
+	    if (options == null) throw error_1.createError("options");
+	}
 
 	var TorstenClient = function () {
 	    function TorstenClient(options) {
@@ -94,6 +96,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	        validateConfig(options);
 	        this._options = options;
+	        if (options.token) this.token = options.token;
 	    }
 
 	    _createClass(TorstenClient, [{

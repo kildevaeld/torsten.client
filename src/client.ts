@@ -27,6 +27,7 @@ interface IMessage {
 
 
 function validateConfig(options: TorstenClientOptions) {
+    if (options == null) throw createError("options");
 
 }
 
@@ -37,6 +38,7 @@ export class TorstenClient implements IClient {
     constructor(options: TorstenClientOptions) {
         validateConfig(options);
         this._options = options;
+        if (options.token) this.token = options.token;
     }
 
 
