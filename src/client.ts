@@ -160,7 +160,7 @@ function getResponse(res: Response): IPromise<Response> {
     if (!res.isValid) {
         if (/text\/plain/.test(res.headers.get('Content-Type'))) {
             return res.text().then(t => {
-                return Promise.reject(new Error(t));
+                return Promise.reject<Response>(new Error(t));
             })
         } else if (/application\/json/.test(res.headers.get('Content-Type'))) {
 
