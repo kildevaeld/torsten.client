@@ -62,6 +62,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	}
 	__export(__webpack_require__(1));
+	__export(__webpack_require__(8));
 	var error_1 = __webpack_require__(5);
 	exports.TorstenClientError = error_1.TorstenClientError;
 	var utils_1 = __webpack_require__(3);
@@ -108,6 +109,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var req = orange_1.extend({}, options, {
 	                token: this.token
 	            });
+	            if (options.mode) {
+	                if (!req.params) req.params = {};
+	                req.params.mode = options.mode;
+	            }
 	            return request.upload(this._toUrl(path), req, data).then(getResponse).then(function (res) {
 	                return res.json();
 	            }).then(function (json) {
@@ -156,22 +161,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            var req = request.request(orange_request_1.HttpMethod.GET, this._toUrl(path), orange_1.extend({}, options, {
 	                token: this._token
 	            }));
-	            var getResponse = function getResponse(res) {
-	                if (!res.isValid) {
-	                    if (/text\/plain/.test(res.headers.get('Content-Type'))) {
-	                        return res.text().then(function (t) {
-	                            return Promise.reject(new Error(t));
-	                        });
-	                    } else if (/application\/json/.test(res.headers.get('Content-Type'))) {
-	                        return res.json().then(function (json) {
-	                            return Promise.reject(new Error(json));
-	                        });
-	                    }
-	                }
+	            return req.then(getResponse).then(function (res) {
 	                return res.json();
-	            };
-	            return req.then(function (res) {
-	                return getResponse(res);
 	            }).then(function (infos) {
 	                if (infos.message != 'ok') return [];
 	                return infos.data.map(function (i) {
@@ -293,7 +284,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	exports.isFormData = isFormData;
 	function isReadableStream(a) {
-	    if (typeof a.read === 'function' && a.pipe === 'function') {
+	    if (typeof a.read === 'function' && typeof a.pipe === 'function') {
 	        return true;
 	    }
 	    return false;
@@ -542,6 +533,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        req.header('Content-Length', "" + data.length);
 	    } else if (utils_1.isObject(data) && !utils_1.isFile(data) && !utils_1.isFormData(data) && !utils_1.isReadableStream(data)) {
 	        try {
+	            console.log('stringi', utils_1.isReadableStream(data));
 	            data = JSON.stringify(data);
 	            req.header('Content-Length', data.length);
 	            mimeType = "application/json";
@@ -566,6 +558,26 @@ return /******/ (function(modules) { // webpackBootstrap
 /***/ function(module, exports) {
 
 	module.exports = __WEBPACK_EXTERNAL_MODULE_7__;
+
+/***/ },
+/* 8 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	(function (FileMode) {
+	    FileMode[FileMode["UserRead"] = 256] = "UserRead";
+	    FileMode[FileMode["UserWrite"] = 128] = "UserWrite";
+	    FileMode[FileMode["UserDelete"] = 64] = "UserDelete";
+	    FileMode[FileMode["GroupRead"] = 32] = "GroupRead";
+	    FileMode[FileMode["GroupWrite"] = 16] = "GroupWrite";
+	    FileMode[FileMode["GroupDelete"] = 8] = "GroupDelete";
+	    FileMode[FileMode["OtherRead"] = 4] = "OtherRead";
+	    FileMode[FileMode["OtherWriter"] = 2] = "OtherWriter";
+	    FileMode[FileMode["OtherDelete"] = 0] = "OtherDelete";
+	})(exports.FileMode || (exports.FileMode = {}));
+	var FileMode = exports.FileMode;
+	;
 
 /***/ }
 /******/ ])

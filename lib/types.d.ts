@@ -1,5 +1,16 @@
 import { IPromise } from 'orange';
 import { HttpMethod } from 'orange.request';
+export declare enum FileMode {
+    UserRead = 256,
+    UserWrite = 128,
+    UserDelete = 64,
+    GroupRead = 32,
+    GroupWrite = 16,
+    GroupDelete = 8,
+    OtherRead = 4,
+    OtherWriter = 2,
+    OtherDelete = 0,
+}
 export interface TorstenResponse {
     message: string;
     data?: any;
@@ -39,6 +50,7 @@ export interface IFileInfo {
 export interface CreateOptions {
     mime?: string;
     size?: number;
+    mode?: FileMode;
     progress?: (e: ProgressEvent) => void;
 }
 export interface GetOptions {

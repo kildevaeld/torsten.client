@@ -21,7 +21,7 @@ export function isFormData(a: any): a is FormData {
 }
 
 export function isReadableStream(a: any): a is ReadableStream {
-    if (typeof a.read === 'function' && a.pipe === 'function') {
+    if (typeof a.read === 'function' && typeof a.pipe === 'function') {
         return true
     }
     return false;

@@ -3,6 +3,7 @@ import {HttpRequest, HttpMethod, BodyType, Response} from 'orange.request'
 import {IPromise} from 'orange'
 import {Request} from './types';
 import {isString, isBuffer, isFormData, isObject, isFile, isReadableStream, isNode} from './utils';
+import {FileMode} from './types';
 
 export interface TorstenRequest extends Request {
     token: string;
@@ -46,8 +47,9 @@ export function upload(url: string, r: TorstenRequest, data): IPromise<Response>
         mimeType = r.mime || "text/plain";
     } else if (isBuffer(data)) {
         req.header('Content-Length', "" + data.length);
-    } else if (isObject(data) && !isFile(data) && !isFormData(data) && !isReadableStream(data)) {
+    } else if (isObject(data) && (!isFile(data) && !isFormData(data) && !isReadableStream(data))) {
         try {
+            console.log('stringi',isReadableStream(data))
             data = JSON.stringify(data);
             req.header('Content-Length', data.length);
             mimeType = "application/json";

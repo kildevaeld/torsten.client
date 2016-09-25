@@ -5,10 +5,10 @@ import {
 import { extend, isObject, IPromise } from 'orange';
 import { isString, isFormData, isReadableStream, isNode, isBuffer } from './utils';
 import { FileInfo } from './file-info';
-import { createError , TorstenJSONError} from './error';
+import { createError, TorstenJSONError} from './error';
 
 import * as request from './request'
-import { HttpMethod, Response } from 'orange.request';
+import { HttpMethod, Response} from 'orange.request';
 
 
 interface Request {
@@ -58,13 +58,18 @@ export class TorstenClient implements IClient {
     create(path: string, data: any, options: CreateOptions = {}): IPromise<IFileInfo> {
         if (data == null) return Promise.reject<IFileInfo>(createError("no data"))
 
-        let req = extend({}, options, {
+        let req: request.TorstenRequest = extend({}, options, {
             token: this.token
         });
 
+        if (options.mode) {
+            if (!req.params) req.params = {};
+            req.params.mode = options.mode;
+        }
+
         return request.upload(this._toUrl(path), req, data)
-        .then(getResponse)
-        .then(res => res.json<IMessage>())
+            .then(getResponse)
+            .then(res => res.json<IMessage>())
             .then(json => {
                 if (json.message != "ok") {
                     throw createError("invalid response");
@@ -104,25 +109,7 @@ export class TorstenClient implements IClient {
             token: this._token
         }))
 
-        var getResponse = (res: Response) => {
-
-            if (!res.isValid) {
-                if (/text\/plain/.test(res.headers.get('Content-Type'))) {
-                    return res.text().then(t => {
-                        return Promise.reject(new Error(t));
-                    })
-                } else if (/application\/json/.test(res.headers.get('Content-Type'))) {
-                    return res.json().then(json => {
-                        return Promise.reject(new Error(<any>json));
-                    })
-                }
-            }
-            return res.json<{ data: FileInfo[]; message: string; }>();
-        }
-
-        return req.then(res => {
-            return getResponse(res)
-        }).then(infos => {
+        return req.then(getResponse).then(res => res.json<IMessage>() ).then(infos => {
             if (infos.message != 'ok') return [];
             return infos.data.map(i => new FileInfo(i));
         })
@@ -169,16 +156,17 @@ export class TorstenClient implements IClient {
 
 
 function getResponse(res: Response): IPromise<Response> {
-
+    
     if (!res.isValid) {
         if (/text\/plain/.test(res.headers.get('Content-Type'))) {
             return res.text().then(t => {
                 return Promise.reject(new Error(t));
             })
         } else if (/application\/json/.test(res.headers.get('Content-Type'))) {
+
             return res.json().then(json => {
-            
-                return Promise.reject<Response>(new TorstenJSONError("response",json));
+
+                return Promise.reject<Response>(new TorstenJSONError("response", json));
             })
         }
     }
