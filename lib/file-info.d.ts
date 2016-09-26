@@ -1,5 +1,6 @@
 import { IFileInfo } from './types';
 export declare class FileInfo implements IFileInfo {
+    id: string;
     name: string;
     mime: string;
     size: number;

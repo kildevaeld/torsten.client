@@ -4,9 +4,10 @@ import { IClient } from './types';
 import { IPromise, has } from 'orange';
 
 const props = ['name', 'mime', 'size', 'ctime', 'mtime', 'mode',
-    'gid', 'uid', 'meta', 'path', 'is_dir', 'hidden'];
+    'gid', 'uid', 'meta', 'path', 'is_dir', 'hidden', 'id'];
 
 export class FileInfo implements IFileInfo {
+    id: string;
     name: string;
     mime: string;
     size: number;

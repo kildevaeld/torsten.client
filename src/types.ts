@@ -38,6 +38,7 @@ export interface Requester {
 }
 
 export interface IFileInfo {
+    id: string;
     name: string;
     mime: string;
     size: number;

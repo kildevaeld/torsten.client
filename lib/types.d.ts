@@ -37,6 +37,7 @@ export interface Requester {
     upload(url: string, req: Request): Promise<any>;
 }
 export interface IFileInfo {
+    id: string;
     name: string;
     mime: string;
     size: number;
