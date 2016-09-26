@@ -40,6 +40,7 @@ export interface Requester {
 export interface IFileInfo {
     id: string;
     name: string;
+    path: string;
     mime: string;
     size: number;
     ctime: Date;
