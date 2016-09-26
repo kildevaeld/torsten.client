@@ -13,7 +13,12 @@ client.list('/').then((list) => {
     console.log(e)
 })
 
+client.statById('0116f0c6-3825-421d-8626-9bf41377f585')
+.then( c => {
+	console.log('Hello', c)
+}).catch(console.error)
 
+/*
 let stream = fs.createReadStream('tsconfig.json')
 
 client.create('/tsconfig13.json', stream, {
@@ -27,7 +32,7 @@ client.create('/tsconfig13.json', stream, {
 	}
 }).then( m => {
 	console.log(m)
-}).catch(console.error)
+}).catch(console.error)*/
 
 /*client.stat('/images/f5dbde7b8f5204c4b51f317580fc9b554c48fbb2.jpg')
 .then((image) => {
