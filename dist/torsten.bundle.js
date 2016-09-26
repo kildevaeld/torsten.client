@@ -63,8 +63,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	__export(__webpack_require__(1));
 	__export(__webpack_require__(16));
-	var error_1 = __webpack_require__(12);
-	exports.TorstenClientError = error_1.TorstenClientError;
+	__export(__webpack_require__(12));
 	var utils_1 = __webpack_require__(10);
 	exports.readBlobAsText = utils_1.readBlobAsText;
 	exports.readBlobAsArrayBuffer = utils_1.readBlobAsArrayBuffer;
