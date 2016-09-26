@@ -113,6 +113,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                if (!req.params) req.params = {};
 	                req.params.mode = options.mode;
 	            }
+	            if (options.meta) {
+	                req.params.meta = JSON.stringify(options.meta);
+	            }
 	            return request.upload(this._toUrl(path), req, data).then(getResponse).then(function (res) {
 	                return res.json();
 	            }).then(function (json) {
@@ -234,15 +237,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    if (!res.isValid) {
 	        switch (res.status) {
 	            case error_1.ErrorCode.NotFound:
-	                throw error_1.createError(error_1.ErrorCode.NotFound, "Not Found");
+	                return Promise.reject(error_1.createError(error_1.ErrorCode.NotFound, "Not Found"));
 	            case error_1.ErrorCode.AlreadyExists:
-	                throw error_1.createError(error_1.ErrorCode.AlreadyExists, "Already Exists");
+	                return Promise.reject(error_1.createError(error_1.ErrorCode.AlreadyExists, "Already Exists"));
 	            case error_1.ErrorCode.Unauthorized:
-	                throw error_1.createError(error_1.ErrorCode.Unauthorized, "Unauthorized");
+	                return Promise.reject(error_1.createError(error_1.ErrorCode.Unauthorized, "Unauthorized"));
 	        }
 	        if (/text\/plain/.test(res.headers.get('Content-Type'))) {
 	            return res.text().then(function (t) {
-	                error_1.createError(error_1.ErrorCode.Unauthorized, t);
+	                return Promise.reject(error_1.createError(error_1.ErrorCode.Unknown, t));
 	            });
 	        } else if (/application\/json/.test(res.headers.get('Content-Type'))) {
 	            return res.json().then(function (json) {

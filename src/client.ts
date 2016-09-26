@@ -56,7 +56,7 @@ export class TorstenClient implements IClient {
     }
 
     create(path: string, data: any, options: CreateOptions = {}): IPromise<IFileInfo> {
-        if (data == null) return Promise.reject<IFileInfo>(createError(ErrorCode.NullData,"no data"))
+        if (data == null) return Promise.reject<IFileInfo>(createError(ErrorCode.NullData, "no data"))
 
         let req: request.TorstenRequest = extend({}, options, {
             token: this.token
@@ -65,6 +65,10 @@ export class TorstenClient implements IClient {
         if (options.mode) {
             if (!req.params) req.params = {};
             req.params.mode = options.mode;
+        }
+
+        if (options.meta) {
+            req.params.meta = JSON.stringify(options.meta);
         }
 
         return request.upload(this._toUrl(path), req, data)
@@ -109,7 +113,7 @@ export class TorstenClient implements IClient {
             token: this._token
         }))
 
-        return req.then(getResponse).then(res => res.json<IMessage>() ).then(infos => {
+        return req.then(getResponse).then(res => res.json<IMessage>()).then(infos => {
             if (infos.message != 'ok') return [];
             return infos.data.map(i => new FileInfo(i));
         })
@@ -156,29 +160,29 @@ export class TorstenClient implements IClient {
 
 
 function getResponse(res: Response): IPromise<Response> {
-    
+
     if (!res.isValid) {
 
         switch (res.status) {
             case ErrorCode.NotFound:
-                throw createError(ErrorCode.NotFound, "Not Found");
-            case ErrorCode.AlreadyExists:    
-                throw createError(ErrorCode.AlreadyExists, "Already Exists");
+                return Promise.reject<Response>(createError(ErrorCode.NotFound, "Not Found"));
+            case ErrorCode.AlreadyExists:
+                return Promise.reject<Response>(createError(ErrorCode.AlreadyExists, "Already Exists"));
             case ErrorCode.Unauthorized:
-                throw createError(ErrorCode.Unauthorized, "Unauthorized");
+                return Promise.reject<Response>(createError(ErrorCode.Unauthorized, "Unauthorized"));
         }
 
         if (/text\/plain/.test(res.headers.get('Content-Type'))) {
             return res.text().then<any>(t => {
-                createError(ErrorCode.Unauthorized, t);
+                return Promise.reject<Response>(createError(ErrorCode.Unknown, t));
             })
         } else if (/application\/json/.test(res.headers.get('Content-Type'))) {
 
             return res.json().then(json => {
-
                 return Promise.reject<Response>(new TorstenJSONError(ErrorCode.Unknown, "response", json));
-            })
+            });
         }
     }
+
     return Promise.resolve(res);
 }

@@ -52,6 +52,7 @@ export interface CreateOptions {
     mime?: string;
     size?: number;
     mode?: FileMode;
+    meta?: any;
     progress?: (e: ProgressEvent) => void;
 }
 export interface GetOptions {
