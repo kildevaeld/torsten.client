@@ -70,6 +70,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.readBlobAsArrayBuffer = utils_1.readBlobAsArrayBuffer;
 	exports.readBlobAsDataURL = utils_1.readBlobAsDataURL;
 	exports.path = utils_1.path;
+	__export(__webpack_require__(4));
 
 /***/ },
 /* 1 */

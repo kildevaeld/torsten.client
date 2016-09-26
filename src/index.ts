@@ -4,3 +4,5 @@ export * from './types';
 export {TorstenClientError} from './error';
 export {readBlobAsText, readBlobAsArrayBuffer, 
     readBlobAsDataURL, path} from './utils';
+
+export * from './file-info'
