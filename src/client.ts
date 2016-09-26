@@ -63,12 +63,11 @@ export class TorstenClient implements IClient {
         });
 
         if (options.mode) {
-            if (!req.params) req.params = {};
-            req.params.mode = options.mode;
+            (req.params = req.params||{}).mode = options.mode;
         }
 
         if (options.meta) {
-            req.params.meta = JSON.stringify(options.meta);
+           (req.params = req.params||{}).meta = JSON.stringify(options.meta);
         }
 
         return request.upload(this._toUrl(path), req, data)

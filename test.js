@@ -16,8 +16,8 @@ client.list('/').then((list) => {
 
 let stream = fs.createReadStream('tsconfig.json')
 
-client.create('/tsconfig10.json', stream, {
-	mode: 256|128|64,
+client.create('/tsconfig13.json', stream, {
+	mode: 256|32,
 	meta: {
 		cropping: {
 			x: 102,
