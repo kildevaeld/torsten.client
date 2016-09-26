@@ -5,7 +5,7 @@ import {
 import { extend, isObject, IPromise } from 'orange';
 import { isString, isFormData, isReadableStream, isNode, isBuffer } from './utils';
 import { FileInfo } from './file-info';
-import { createError, TorstenJSONError} from './error';
+import { createError, TorstenJSONError, ErrorCode} from './error';
 
 import * as request from './request'
 import { HttpMethod, Response} from 'orange.request';
@@ -27,7 +27,7 @@ interface IMessage {
 
 
 function validateConfig(options: TorstenClientOptions) {
-    if (options == null) throw createError("options");
+    if (options == null) throw createError(0, "options");
 
 }
 
@@ -56,7 +56,7 @@ export class TorstenClient implements IClient {
     }
 
     create(path: string, data: any, options: CreateOptions = {}): IPromise<IFileInfo> {
-        if (data == null) return Promise.reject<IFileInfo>(createError("no data"))
+        if (data == null) return Promise.reject<IFileInfo>(createError(ErrorCode.NullData,"no data"))
 
         let req: request.TorstenRequest = extend({}, options, {
             token: this.token
@@ -72,7 +72,7 @@ export class TorstenClient implements IClient {
             .then(res => res.json<IMessage>())
             .then(json => {
                 if (json.message != "ok") {
-                    throw createError("invalid response");
+                    throw createError(ErrorCode.Unknown, "invalid response: " + json.message);
                 }
                 return json.data;
             })
@@ -158,15 +158,25 @@ export class TorstenClient implements IClient {
 function getResponse(res: Response): IPromise<Response> {
     
     if (!res.isValid) {
+
+        switch (res.status) {
+            case ErrorCode.NotFound:
+                throw createError(ErrorCode.NotFound, "Not Found");
+            case ErrorCode.AlreadyExists:    
+                throw createError(ErrorCode.AlreadyExists, "Already Exists");
+            case ErrorCode.Unauthorized:
+                throw createError(ErrorCode.Unauthorized, "Unauthorized");
+        }
+
         if (/text\/plain/.test(res.headers.get('Content-Type'))) {
-            return res.text().then(t => {
-                return Promise.reject<Response>(new Error(t));
+            return res.text().then<any>(t => {
+                createError(ErrorCode.Unauthorized, t);
             })
         } else if (/application\/json/.test(res.headers.get('Content-Type'))) {
 
             return res.json().then(json => {
 
-                return Promise.reject<Response>(new TorstenJSONError("response", json));
+                return Promise.reject<Response>(new TorstenJSONError(ErrorCode.Unknown, "response", json));
             })
         }
     }

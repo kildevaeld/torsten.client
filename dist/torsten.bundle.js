@@ -89,7 +89,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var request = __webpack_require__(13);
 	var orange_request_1 = __webpack_require__(14);
 	function validateConfig(options) {
-	    if (options == null) throw error_1.createError("options");
+	    if (options == null) throw error_1.createError(0, "options");
 	}
 
 	var TorstenClient = function () {
@@ -106,7 +106,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function create(path, data) {
 	            var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
 
-	            if (data == null) return Promise.reject(error_1.createError("no data"));
+	            if (data == null) return Promise.reject(error_1.createError(error_1.ErrorCode.NullData, "no data"));
 	            var req = orange_1.extend({}, options, {
 	                token: this.token
 	            });
@@ -118,7 +118,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                return res.json();
 	            }).then(function (json) {
 	                if (json.message != "ok") {
-	                    throw error_1.createError("invalid response");
+	                    throw error_1.createError(error_1.ErrorCode.Unknown, "invalid response: " + json.message);
 	                }
 	                return json.data;
 	            });
@@ -233,13 +233,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.TorstenClient = TorstenClient;
 	function getResponse(res) {
 	    if (!res.isValid) {
+	        switch (res.status) {
+	            case error_1.ErrorCode.NotFound:
+	                throw error_1.createError(error_1.ErrorCode.NotFound, "Not Found");
+	            case error_1.ErrorCode.AlreadyExists:
+	                throw error_1.createError(error_1.ErrorCode.AlreadyExists, "Already Exists");
+	            case error_1.ErrorCode.Unauthorized:
+	                throw error_1.createError(error_1.ErrorCode.Unauthorized, "Unauthorized");
+	        }
 	        if (/text\/plain/.test(res.headers.get('Content-Type'))) {
 	            return res.text().then(function (t) {
-	                return Promise.reject(new Error(t));
+	                error_1.createError(error_1.ErrorCode.Unauthorized, t);
 	            });
 	        } else if (/application\/json/.test(res.headers.get('Content-Type'))) {
 	            return res.json().then(function (json) {
-	                return Promise.reject(new error_1.TorstenJSONError("response", json));
+	                return Promise.reject(new error_1.TorstenJSONError(error_1.ErrorCode.Unknown, "response", json));
 	            });
 	        }
 	    }
@@ -1554,23 +1562,45 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	"use strict";
 
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+	(function (ErrorCode) {
+	    ErrorCode[ErrorCode["AlreadyExists"] = 409] = "AlreadyExists";
+	    ErrorCode[ErrorCode["NotFound"] = 404] = "NotFound";
+	    ErrorCode[ErrorCode["Unauthorized"] = 401] = "Unauthorized";
+	    ErrorCode[ErrorCode["Unknown"] = 500] = "Unknown";
+	    ErrorCode[ErrorCode["NullData"] = 600] = "NullData";
+	})(exports.ErrorCode || (exports.ErrorCode = {}));
+	var ErrorCode = exports.ErrorCode;
+
 	var TorstenClientError = function (_Error) {
 	    _inherits(TorstenClientError, _Error);
 
-	    function TorstenClientError(message) {
+	    function TorstenClientError(code, message) {
 	        _classCallCheck(this, TorstenClientError);
 
 	        var _this = _possibleConstructorReturn(this, (TorstenClientError.__proto__ || Object.getPrototypeOf(TorstenClientError)).call(this, message));
 
+	        _this.code = code;
 	        _this.message = message;
 	        return _this;
 	    }
+
+	    _createClass(TorstenClientError, [{
+	        key: "toJSON",
+	        value: function toJSON() {
+	            return {
+	                message: this.message,
+	                code: this.code
+	            };
+	        }
+	    }]);
 
 	    return TorstenClientError;
 	}(Error);
@@ -1580,10 +1610,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	var TorstenJSONError = function (_TorstenClientError) {
 	    _inherits(TorstenJSONError, _TorstenClientError);
 
-	    function TorstenJSONError(message, json) {
+	    function TorstenJSONError(code, message, json) {
 	        _classCallCheck(this, TorstenJSONError);
 
-	        var _this2 = _possibleConstructorReturn(this, (TorstenJSONError.__proto__ || Object.getPrototypeOf(TorstenJSONError)).call(this, message));
+	        var _this2 = _possibleConstructorReturn(this, (TorstenJSONError.__proto__ || Object.getPrototypeOf(TorstenJSONError)).call(this, code, message));
 
 	        _this2.json = json;
 	        return _this2;
@@ -1593,8 +1623,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	}(TorstenClientError);
 
 	exports.TorstenJSONError = TorstenJSONError;
-	function createError(msg) {
-	    return new TorstenClientError(msg);
+	function createError(code, msg) {
+	    return new TorstenClientError(code, msg);
 	}
 	exports.createError = createError;
 
