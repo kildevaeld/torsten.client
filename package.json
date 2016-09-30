@@ -1,6 +1,6 @@
 {
   "name": "torsten",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "",
   "main": "lib/index.js",
   "scripts": {
@@ -41,6 +41,8 @@
     "webpack-stream": "^3.2.0"
   },
   "dependencies": {
+    "babel": "^6.5.2",
+    "babel-core": "^6.16.0",
     "orange": "git+https://github.com/kildevaeld/orange.git",
     "orange.request": "git+https://github.com/kildevaeld/orange.request.git"
   },
