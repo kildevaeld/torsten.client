@@ -103,7 +103,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _createClass(TorstenClient, [{
 	        key: 'create',
 	        value: function create(path, data) {
-	            var options = arguments.length <= 2 || arguments[2] === undefined ? {} : arguments[2];
+	            var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
 	            if (data == null) return Promise.reject(error_1.createError(error_1.ErrorCode.NullData, "no data"));
 	            var req = orange_1.extend({}, options, {
@@ -127,7 +127,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'stat',
 	        value: function stat(path) {
-	            var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	            var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
 	            var url = this._toUrl(path);
 	            return request.request(orange_request_1.HttpMethod.GET, url, {
@@ -143,7 +143,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'statById',
 	        value: function statById(id) {
-	            var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	            var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
 	            return request.request(orange_request_1.HttpMethod.GET, this.endpoint, {
 	                progress: options.progress,
@@ -158,7 +158,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'list',
 	        value: function list(path) {
-	            var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	            var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
 	            var req = request.request(orange_request_1.HttpMethod.GET, this._toUrl(path), orange_1.extend({}, options, {
 	                token: this._token
@@ -177,7 +177,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function open(path) {
 	            var _this = this;
 
-	            var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	            var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
 	            return this.stat(path, orange_1.extend({}, options, {
 	                token: this._token
@@ -426,7 +426,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    function FileInfo() {
 	        var _this = this;
 
-	        var attr = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+	        var attr = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
 	        _classCallCheck(this, FileInfo);
 
