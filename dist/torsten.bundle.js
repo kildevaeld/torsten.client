@@ -208,6 +208,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: '_toUrl',
 	        value: function _toUrl(path) {
+	            if (path == null) {
+	                throw new Error('no path');
+	            }
 	            if (path.substr(0, 1) != "/") {
 	                path = "/" + path;
 	            }
@@ -1707,6 +1710,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.queryStringToParams = utils_1.queryStringToParams;
 	exports.isValid = utils_1.isValid;
 	exports.isNode = utils_1.isNode;
+	exports.queryParam = utils_1.queryParam;
 	__export(__webpack_require__(20));
 	__export(__webpack_require__(17));
 	__export(__webpack_require__(22));

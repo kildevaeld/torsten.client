@@ -5,10 +5,10 @@ import {
 import { extend, isObject, IPromise } from 'orange';
 import { isString, isFormData, isReadableStream, isNode, isBuffer } from './utils';
 import { FileInfo } from './file-info';
-import { createError, TorstenJSONError, ErrorCode} from './error';
+import { createError, TorstenJSONError, ErrorCode } from './error';
 
 import * as request from './request'
-import { HttpMethod, Response} from 'orange.request';
+import { HttpMethod, Response } from 'orange.request';
 
 
 interface Request {
@@ -63,11 +63,11 @@ export class TorstenClient implements IClient {
         });
 
         if (options.mode) {
-            (req.params = req.params||{}).mode = options.mode;
+            (req.params = req.params || {}).mode = options.mode;
         }
 
         if (options.meta) {
-           (req.params = req.params||{}).meta = JSON.stringify(options.meta);
+            (req.params = req.params || {}).meta = JSON.stringify(options.meta);
         }
 
         return request.upload(this._toUrl(path), req, data)
@@ -149,6 +149,9 @@ export class TorstenClient implements IClient {
     }
 
     private _toUrl(path: string) {
+        if (path == null) {
+            throw new Error('no path');
+        }
         if (path.substr(0, 1) != "/") {
             path = "/" + path;
         }

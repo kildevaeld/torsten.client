@@ -208,6 +208,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: '_toUrl',
 	        value: function _toUrl(path) {
+	            if (path == null) {
+	                throw new Error('no path');
+	            }
 	            if (path.substr(0, 1) != "/") {
 	                path = "/" + path;
 	            }
