@@ -145,7 +145,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        value: function statById(id) {
 	            var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
-	            return request.request(orange_request_1.HttpMethod.GET, this.endpoint, {
+	            return request.request(orange_request_1.HttpMethod.GET, this._toUrl('/'), {
 	                progress: options.progress,
 	                params: { stat: true, id: id },
 	                token: this._token

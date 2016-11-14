@@ -97,7 +97,7 @@ export class TorstenClient implements IClient {
     }
 
     statById(id: string, options: GetOptions = {}): IPromise<IFileInfo> {
-        return request.request(HttpMethod.GET, this.endpoint, {
+        return request.request(HttpMethod.GET, this._toUrl('/'), {
             progress: options.progress,
             params: { stat: true, id: id },
             token: this._token
