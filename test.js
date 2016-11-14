@@ -3,11 +3,14 @@ const fs = require('fs')
 var Client = require('./lib').TorstenClient;
 
 let client = new Client({
-    endpoint: "https://images.theedition.dk"
+	endpoint: "http://localhost:4000",
+	token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbiI6IjJjODAwMjdhZjNhZmNjMjc5NzIzZjA0MGI3OGEyYmE1MThjODQ4NTUxOGQ1NTNiOTEzZWRhOWUwNDBiNWQ3NGEiLCJ1aWQiOiJlOWIwZjUzZi1lNDI0LTRiMWMtYjViZi1mMTgxNjE2NmNhYmIifQ.r7hMJZg_f3PvnRYMwKbIKwKx12wXonI4T9OrY5sVRls'
 });
 
-client.list('/').catch(e => {
+client.list('/images').catch(e => {
 	console.log('error', e)
+}).then(l => {
+	console.log(l)
 })
 
 /*client.token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI5MDlkMzdhNC1kMTI4LTRmOGQtYjFlMS0wYWVmMWY2MGEwMzUiLCJnaWQiOlsiMGY1MDJkZWYtMzE5Yy00ODE1LTg1ZjUtMGFhMDBhMGQ1MTFiIiwiMTM2YTAzYzUtZDcyNi00Y2I5LWI3M2YtZTYyODFjMjM0YmJhIl0sImlhdCI6MTQ3NDgyMzExMX0.XDVoZ8j5sY-pyUZJpj7ynfRYTuaGvwSpFAhyf1tIUR4"
