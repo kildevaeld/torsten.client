@@ -1717,7 +1717,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	__export(__webpack_require__(22));
 	var base_http_request_2 = __webpack_require__(15);
 	exports.HttpMethod = base_http_request_2.HttpMethod;
-	exports.HttpError = base_http_request_2.HttpError;
 	var base_http_request_3 = __webpack_require__(15);
 	function get(url) {
 	    return new HttpRequest(base_http_request_3.HttpMethod.GET, url);
@@ -1754,10 +1753,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
 	var orange_1 = __webpack_require__(2);
 	var utils_1 = __webpack_require__(16);
 	var header_1 = __webpack_require__(17);
@@ -1771,25 +1766,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	})(exports.HttpMethod || (exports.HttpMethod = {}));
 	var HttpMethod = exports.HttpMethod;
 
-	var HttpError = function (_Error) {
-	    _inherits(HttpError, _Error);
-
-	    function HttpError(response) {
-	        _classCallCheck(this, HttpError);
-
-	        var _this = _possibleConstructorReturn(this, (HttpError.__proto__ || Object.getPrototypeOf(HttpError)).call(this));
-
-	        _this.response = response;
-	        _this.status = response.status;
-	        _this.statusText = response.statusText;
-	        return _this;
-	    }
-
-	    return HttpError;
-	}(Error);
-
-	exports.HttpError = HttpError;
-
 	var BaseHttpRequest = function () {
 	    function BaseHttpRequest(_method, _url) {
 	        _classCallCheck(this, BaseHttpRequest);
@@ -1798,7 +1774,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this._url = _url;
 	        this._params = {};
 	        this._headers = new header_1.Headers();
-	        //private _body: any;
 	        this._request = {};
 	        if (!utils_1.isNode) {
 	            this._headers.append('X-Requested-With', 'XMLHttpRequest');
@@ -1849,30 +1824,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'json',
 	        value: function json(data) {
-	            var throwOnInvalid = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-
 	            this.header('content-type', 'application/json; charset=utf-8');
 	            if (!orange_1.isString(data)) {
 	                data = JSON.stringify(data);
 	            }
-	            return this.end(data, throwOnInvalid).then(function (res) {
+	            return this.end(data).then(function (res) {
 	                return res.json();
 	            });
 	        }
 	    }, {
 	        key: 'text',
 	        value: function text(data) {
-	            var throwOnInvalid = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-
-	            return this.end(data, throwOnInvalid).then(function (r) {
+	            return this.end(data).then(function (r) {
 	                return r.text();
 	            });
 	        }
 	    }, {
 	        key: 'end',
 	        value: function end(data) {
-	            var throwOnInvalid = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
-
 	            var url = this._url;
 	            if (data && data === Object(data) && this._method == HttpMethod.GET /* && check for content-type */) {
 	                    var sep = url.indexOf('?') === -1 ? '?' : '&';
@@ -1884,12 +1853,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	            url = this._apply_params(url);
 	            this._request.headers = this._headers;
-	            return this._fetch(url, this._request).then(function (res) {
-	                if (!res.isValid && throwOnInvalid) {
-	                    throw new HttpError(res);
-	                }
+	            /*return fetch(url, this._request)
+	            .then((res: Response) => {
 	                return res;
-	            });
+	            });*/
+	            return this._fetch(url, this._request);
 	        }
 	    }, {
 	        key: 'then',
@@ -2012,20 +1980,12 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var Headers = function () {
 	    function Headers(headers) {
-	        var _this = this;
-
 	        _classCallCheck(this, Headers);
 
 	        this.map = {};
 	        if (headers instanceof Headers) {
-	            var _loop = function _loop(key) {
-	                headers.map[key].forEach(function (v) {
-	                    return _this.append(key, v);
-	                });
-	            };
-
 	            for (var key in headers.map) {
-	                _loop(key);
+	                this.append(key, headers.map[key]);
 	            }
 	        } else if (headers) {
 	            var names = Object.getOwnPropertyNames(headers);
@@ -2281,7 +2241,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var Request = function () {
 	    function Request(input) {
-	        var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+	        var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
 
 	        _classCallCheck(this, Request);
 
@@ -2377,7 +2337,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    reader.readAsText(blob);
 	    return fileReaderReady(reader);
 	}
-	//var redirectStatuses = [301, 302, 303, 307, 308]
+	var redirectStatuses = [301, 302, 303, 307, 308];
 
 	var BaseResponse = function () {
 	    function BaseResponse(body, options) {

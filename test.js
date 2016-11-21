@@ -4,7 +4,7 @@ var Client = require('./lib').TorstenClient;
 
 let client = new Client({
 	endpoint: "http://localhost:4000",
-	token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbiI6IjJjODAwMjdhZjNhZmNjMjc5NzIzZjA0MGI3OGEyYmE1MThjODQ4NTUxOGQ1NTNiOTEzZWRhOWUwNDBiNWQ3NGEiLCJ1aWQiOiJlOWIwZjUzZi1lNDI0LTRiMWMtYjViZi1mMTgxNjE2NmNhYmIifQ.r7hMJZg_f3PvnRYMwKbIKwKx12wXonI4T9OrY5sVRls'
+	token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbiI6IjgyYzA2YTUwYWM0MzhmMWQ0NDc3MTBlYjczZTU0OWU3NmM0MzNmOTRlNTNjZDY1ZjlmMDFiYjUwZWEyMWY1ZTkiLCJ1aWQiOiJmODk1NmFjOS00OWM4LTQxYzgtOWY1OS0xYWJkNzMwMjdiNGYifQ.wy3sRd3D_Ic4xgSMlnyQOJctGZp0oiBNH8-loeQpKfE'
 });
 
 client.list('/images').catch(e => {
