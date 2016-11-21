@@ -13,9 +13,9 @@ client.list('/images').catch(e => {
 	console.log(l)
 })
 
-var test1 = "hello, world"
+var v = fs.createReadStream('/Users/rasmus/Desktop/fleamarket.jpg')
 
-client.create("/test.txt", test1)
+client.create("/test.jpg", v)
 .then(() => {
 	console.log('done')
 })
