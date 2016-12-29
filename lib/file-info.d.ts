@@ -13,6 +13,7 @@ export declare class FileInfo implements IFileInfo {
     path: string;
     is_dir: boolean;
     hidden: boolean;
-    fullPath: string;
+    readonly fullPath: string;
     constructor(attr?: any);
+    toString(): string;
 }

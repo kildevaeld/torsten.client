@@ -1,4 +1,3 @@
-
 const gulp = require('gulp'),
     wpstream = require('webpack-stream'),
     webpack = require('webpack'),
@@ -44,19 +43,19 @@ gulp.task('webpack', ['typescript'], () => {
                 );
             },*/
             node: webpackNode,
-           /* module: {
-                loaders: [
-                    { test: /\.json/, loader: 'json-loader' },
-                    { test: /stream.js$/, loader: 'ignore-loader' },
-                    { test: /\.js$/, loader: 'babel', query: { presets: ['es2015'] } },
+            /* module: {
+                 loaders: [
+                     { test: /\.json/, loader: 'json-loader' },
+                     { test: /stream.js$/, loader: 'ignore-loader' },
+                     { test: /\.js$/, loader: 'babel', query: { presets: ['es2015'] } },
 
-                ]
-            }*/
+                 ]
+             }*/
 
             externals: {
                 "orange": "orange",
                 "orange.request": {
-                    root: ['orange','request'],
+                    root: ['orange', 'request'],
                     commonjs2: 'orange.request',
                     commonjs: 'orange.request',
                     amd: 'orange.request'
@@ -102,16 +101,18 @@ gulp.task('webpack:bundle', ['typescript'], () => {
 });
 
 gulp.task('typescript', () => {
-    var project = tsc.createProject('tsconfig.json')
+    var project = tsc.createProject('tsconfig.json', {
+        typescript: require('typescript')
+    });
 
     let p = project.src()
-        .pipe(tsc(project))
+        .pipe(project())
 
     let js = p.js
-    .pipe(babel({
-        presets: ['es2015']
-    }))
-        
+        .pipe(babel({
+            presets: ['es2015']
+        }))
+
 
     return merge([
         js.pipe(gulp.dest('lib')),
@@ -122,7 +123,6 @@ gulp.task('typescript', () => {
 
 gulp.task('default', ['webpack', 'webpack:bundle'])
 
-
 gulp.task('watch', () => {
     gulp.watch('./src/*.ts', ['webpack:bundle', 'webpack'])
-})
+});

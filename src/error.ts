@@ -1,8 +1,8 @@
 
 
 export enum ErrorCode {
-	AlreadyExists = 409,
-	NotFound = 404,
+    AlreadyExists = 409,
+    NotFound = 404,
     Unauthorized = 401,
     Unknown = 500,
 
@@ -14,7 +14,7 @@ export class TorstenClientError extends Error {
         super(message);
     }
 
-    toJSON() {
+    toJSON(): any {
         return {
             message: this.message,
             code: this.code
@@ -23,8 +23,16 @@ export class TorstenClientError extends Error {
 }
 
 export class TorstenJSONError extends TorstenClientError {
-    constructor(code: ErrorCode, message: string, public json:Object) {
+    constructor(code: ErrorCode, message: string, public json: Object) {
         super(code, message);
+    }
+
+    toJSON() {
+        return {
+            code: this.code,
+            message: this.message,
+            data: this.json
+        }
     }
 }
 

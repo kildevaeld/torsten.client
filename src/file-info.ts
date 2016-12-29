@@ -1,7 +1,6 @@
 
 import { IFileInfo } from './types';
-import { IClient } from './types';
-import { IPromise, has } from 'orange';
+import { has } from 'orange';
 
 const props = ['name', 'mime', 'size', 'ctime', 'mtime', 'mode',
     'gid', 'uid', 'meta', 'path', 'is_dir', 'hidden', 'id'];
@@ -26,10 +25,16 @@ export class FileInfo implements IFileInfo {
     }
 
     constructor(attr: any = {}) {
-        
+
         props.forEach(m => {
             if (has(attr, m)) {
                 this[m] = attr[m];
+            } else {
+                if (m == 'meta') {
+                    this.meta = {};
+                } else {
+                    throw new Error(`property: ${m} does not exists`);
+                }
             }
         });
 
@@ -41,5 +46,11 @@ export class FileInfo implements IFileInfo {
             this.mtime = new Date(<any>this.mtime);
         }
     }
+
+    toString() {
+        return `FileInfo(name=${this.name}, mime=${this.mime})`;
+    }
+
+
 
 }

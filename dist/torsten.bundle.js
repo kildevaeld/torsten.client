@@ -62,14 +62,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	}
 	__export(__webpack_require__(1));
-	__export(__webpack_require__(23));
-	__export(__webpack_require__(12));
-	var utils_1 = __webpack_require__(10);
+	__export(__webpack_require__(2));
+	__export(__webpack_require__(13));
+	var utils_1 = __webpack_require__(11);
 	exports.readBlobAsText = utils_1.readBlobAsText;
 	exports.readBlobAsArrayBuffer = utils_1.readBlobAsArrayBuffer;
 	exports.readBlobAsDataURL = utils_1.readBlobAsDataURL;
 	exports.path = utils_1.path;
-	__export(__webpack_require__(11));
+	__export(__webpack_require__(12));
 
 /***/ },
 /* 1 */
@@ -81,14 +81,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	var orange_1 = __webpack_require__(2);
-	var utils_1 = __webpack_require__(10);
-	var file_info_1 = __webpack_require__(11);
-	var error_1 = __webpack_require__(12);
-	var request = __webpack_require__(13);
-	var orange_request_1 = __webpack_require__(14);
+	var types_1 = __webpack_require__(2);
+	var orange_1 = __webpack_require__(3);
+	var utils_1 = __webpack_require__(11);
+	var file_info_1 = __webpack_require__(12);
+	var error_1 = __webpack_require__(13);
+	var request = __webpack_require__(14);
+	var orange_request_1 = __webpack_require__(15);
 	function validateConfig(options) {
 	    if (options == null) throw error_1.createError(0, "options");
+	    if (options.endpoint == null) throw error_1.createError(0, "needs endpoint");
 	}
 
 	var TorstenClient = function () {
@@ -101,13 +103,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    _createClass(TorstenClient, [{
-	        key: 'create',
+	        key: "create",
 	        value: function create(path, data) {
 	            var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
+	            this._check_token();
 	            if (data == null) return Promise.reject(error_1.createError(error_1.ErrorCode.NullData, "no data"));
 	            var req = orange_1.extend({}, options, {
-	                token: this.token
+	                token: this.token,
+	                data: data
 	            });
 	            if (options.mode) {
 	                (req.params = req.params || {}).mode = options.mode;
@@ -115,20 +119,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	            if (options.meta) {
 	                (req.params = req.params || {}).meta = JSON.stringify(options.meta);
 	            }
-	            return request.upload(this._toUrl(path), req, data).then(getResponse).then(function (res) {
+	            return request.request(orange_request_1.HttpMethod.POST, this._toUrl(path), req).then(getResponse).then(function (res) {
 	                return res.json();
 	            }).then(function (json) {
-	                if (json.message != "ok") {
+	                if (json.message != types_1.constants.MessageOK) {
 	                    throw error_1.createError(error_1.ErrorCode.Unknown, "invalid response: " + json.message);
 	                }
-	                return json.data;
+	                return new file_info_1.FileInfo(json.data);
 	            });
 	        }
 	    }, {
-	        key: 'stat',
+	        key: "stat",
 	        value: function stat(path) {
 	            var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
+	            this._check_token();
 	            var url = this._toUrl(path);
 	            return request.request(orange_request_1.HttpMethod.GET, url, {
 	                progress: options.progress,
@@ -141,10 +146,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	            });
 	        }
 	    }, {
-	        key: 'statById',
+	        key: "statById",
 	        value: function statById(id) {
 	            var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
+	            this._check_token();
 	            return request.request(orange_request_1.HttpMethod.GET, this._toUrl('/'), {
 	                progress: options.progress,
 	                params: { stat: true, id: id },
@@ -156,10 +162,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	            });
 	        }
 	    }, {
-	        key: 'list',
+	        key: "list",
 	        value: function list(path) {
 	            var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
+	            this._check_token();
 	            var req = request.request(orange_request_1.HttpMethod.GET, this._toUrl(path), orange_1.extend({}, options, {
 	                token: this._token
 	            }));
@@ -173,31 +180,33 @@ return /******/ (function(modules) { // webpackBootstrap
 	            });
 	        }
 	    }, {
-	        key: 'open',
+	        key: "open",
 	        value: function open(path) {
-	            var _this = this;
-
 	            var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
-	            return this.stat(path, orange_1.extend({}, options, {
-	                token: this._token
-	            })).then(function (info) {
-	                var r = {
-	                    progress: options.progress,
-	                    token: _this.token
-	                };
-	                if (options.thumbnail) {
-	                    r.params = r.params || {};
-	                    r.params.thumbnail = true;
-	                }
-	                return request.request(orange_request_1.HttpMethod.GET, _this._toUrl(path), r).then(function (r) {
-	                    return utils_1.isNode ? r.stream() : r.blob();
-	                });
+	            this._check_token();
+	            var r = {
+	                progress: options.progress,
+	                token: this.token
+	            };
+	            if (options.thumbnail) {
+	                r.params = r.params || {};
+	                r.params.thumbnail = true;
+	            }
+	            var p = void 0;
+	            if (path instanceof file_info_1.FileInfo) {
+	                p = path.fullPath;
+	            } else {
+	                p = path;
+	            }
+	            return request.request(orange_request_1.HttpMethod.GET, this._toUrl(p), r).then(function (r) {
+	                return utils_1.isNode ? r.stream() : r.blob();
 	            });
 	        }
 	    }, {
-	        key: 'remove',
+	        key: "remove",
 	        value: function remove(path) {
+	            this._check_token();
 	            var url = this._toUrl(path);
 	            return request.request(orange_request_1.HttpMethod.DELETE, url, {
 	                token: this.token
@@ -206,7 +215,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            });
 	        }
 	    }, {
-	        key: '_toUrl',
+	        key: "_toUrl",
 	        value: function _toUrl(path) {
 	            if (path == null) {
 	                throw new Error('no path');
@@ -218,7 +227,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return this._options.endpoint + path;
 	        }
 	    }, {
-	        key: 'token',
+	        key: "_check_token",
+	        value: function _check_token() {
+	            if (!this.token) throw error_1.createError(0, "no token");
+	        }
+	    }, {
+	        key: "token",
 	        set: function set(token) {
 	            this._token = token;
 	        },
@@ -226,7 +240,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            return this._token;
 	        }
 	    }, {
-	        key: 'endpoint',
+	        key: "endpoint",
 	        get: function get() {
 	            return this._options.endpoint;
 	        }
@@ -252,7 +266,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            });
 	        } else if (/application\/json/.test(res.headers.get('Content-Type'))) {
 	            return res.json().then(function (json) {
-	                return Promise.reject(new error_1.TorstenJSONError(error_1.ErrorCode.Unknown, "response", json));
+	                return Promise.reject(new error_1.TorstenJSONError(error_1.ErrorCode.Unknown, "Unknown JSON Response", json));
 	            });
 	        }
 	    }
@@ -261,6 +275,30 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 2 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	var FileMode;
+	(function (FileMode) {
+	    FileMode[FileMode["UserRead"] = 256] = "UserRead";
+	    FileMode[FileMode["UserWrite"] = 128] = "UserWrite";
+	    FileMode[FileMode["UserDelete"] = 64] = "UserDelete";
+	    FileMode[FileMode["GroupRead"] = 32] = "GroupRead";
+	    FileMode[FileMode["GroupWrite"] = 16] = "GroupWrite";
+	    FileMode[FileMode["GroupDelete"] = 8] = "GroupDelete";
+	    FileMode[FileMode["OtherRead"] = 4] = "OtherRead";
+	    FileMode[FileMode["OtherWriter"] = 2] = "OtherWriter";
+	    FileMode[FileMode["OtherDelete"] = 0] = "OtherDelete";
+	})(FileMode = exports.FileMode || (exports.FileMode = {}));
+	;
+	var constants;
+	(function (constants) {
+	    constants.MessageOK = "ok";
+	})(constants = exports.constants || (exports.constants = {}));
+
+/***/ },
+/* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -270,16 +308,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (!exports.hasOwnProperty(p)) exports[p] = m[p];
 	    }
 	}
-	__export(__webpack_require__(3));
 	__export(__webpack_require__(4));
-	__export(__webpack_require__(7));
 	__export(__webpack_require__(5));
 	__export(__webpack_require__(8));
 	__export(__webpack_require__(6));
 	__export(__webpack_require__(9));
+	__export(__webpack_require__(7));
+	__export(__webpack_require__(10));
 
 /***/ },
-/* 3 */
+/* 4 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -501,16 +539,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	;
 
 /***/ },
-/* 4 */
+/* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 
 	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
-	var arrays_1 = __webpack_require__(5);
-	var strings_1 = __webpack_require__(6);
-	var objects_1 = __webpack_require__(7);
+	var arrays_1 = __webpack_require__(6);
+	var strings_1 = __webpack_require__(7);
+	var objects_1 = __webpack_require__(8);
 	var nativeBind = Function.prototype.bind;
 	function proxy(from, to, fns) {
 	    if (!Array.isArray(fns)) fns = [fns];
@@ -603,7 +641,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.inherits = inherits;
 
 /***/ },
-/* 5 */
+/* 6 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -769,7 +807,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.sortBy = sortBy;
 
 /***/ },
-/* 6 */
+/* 7 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -804,13 +842,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.humanFileSize = humanFileSize;
 
 /***/ },
-/* 7 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 
-	var utils_1 = __webpack_require__(3);
-	var arrays_1 = __webpack_require__(5);
+	var utils_1 = __webpack_require__(4);
+	var arrays_1 = __webpack_require__(6);
 	/**
 	 * Takes a nested object and returns a shallow object keyed with the path names
 	 * e.g. { "level1.level2": "value" }
@@ -1008,13 +1046,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.intersection = intersection;
 
 /***/ },
-/* 8 */
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 
-	var arrays_1 = __webpack_require__(5);
-	var utils_1 = __webpack_require__(3);
+	var arrays_1 = __webpack_require__(6);
+	var utils_1 = __webpack_require__(4);
 	exports.Promise = typeof window === 'undefined' ? global.Promise : window.Promise;
 	// Promises
 	function isPromise(obj) {
@@ -1166,7 +1204,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.mapAsync = mapAsync;
 
 /***/ },
-/* 9 */
+/* 10 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -1342,24 +1380,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.Map = self.Map;
 
 /***/ },
-/* 10 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 
 	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	var orange_1 = __webpack_require__(2);
-
-	var ReadableStream = function ReadableStream() {
-	    _classCallCheck(this, ReadableStream);
-	};
-
-	exports.ReadableStream = ReadableStream;
+	var orange_1 = __webpack_require__(3);
 	exports.isNode = !new Function("try {return this===window;}catch(e){ return false;}")();
-	var orange_2 = __webpack_require__(2);
+	var orange_2 = __webpack_require__(3);
 	exports.isObject = orange_2.isObject;
 	exports.isString = orange_2.isString;
 	exports.isFunction = orange_2.isFunction;
@@ -1464,12 +1494,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	                w++;
 	            }
 	        }
-	        /*for i, c := range str {
-	            if m&(1<<uint(32-1-i)) != 0 {
-	                buf[w] = byte(c)
-	                w++
-	            }
-	        }*/
 	        if (w == 0) {
 	            buf[w] = '-';
 	            w++;
@@ -1490,7 +1514,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	})(filemode = exports.filemode || (exports.filemode = {}));
 
 /***/ },
-/* 11 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -1499,10 +1523,17 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	var orange_1 = __webpack_require__(2);
+	var orange_1 = __webpack_require__(3);
 	var props = ['name', 'mime', 'size', 'ctime', 'mtime', 'mode', 'gid', 'uid', 'meta', 'path', 'is_dir', 'hidden', 'id'];
 
 	var FileInfo = function () {
+	    _createClass(FileInfo, [{
+	        key: "fullPath",
+	        get: function get() {
+	            return this.path + this.name;
+	        }
+	    }]);
+
 	    function FileInfo() {
 	        var _this = this;
 
@@ -1513,6 +1544,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        props.forEach(function (m) {
 	            if (orange_1.has(attr, m)) {
 	                _this[m] = attr[m];
+	            } else {
+	                if (m == 'meta') {
+	                    _this.meta = {};
+	                } else {
+	                    throw new Error("property: " + m + " does not exists");
+	                }
 	            }
 	        });
 	        if (!(this.ctime instanceof Date)) {
@@ -1524,9 +1561,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 
 	    _createClass(FileInfo, [{
-	        key: 'fullPath',
-	        get: function get() {
-	            return this.path + this.name;
+	        key: "toString",
+	        value: function toString() {
+	            return "FileInfo(name=" + this.name + ", mime=" + this.mime + ")";
 	        }
 	    }]);
 
@@ -1536,7 +1573,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.FileInfo = FileInfo;
 
 /***/ },
-/* 12 */
+/* 13 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -1549,14 +1586,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+	var ErrorCode;
 	(function (ErrorCode) {
 	    ErrorCode[ErrorCode["AlreadyExists"] = 409] = "AlreadyExists";
 	    ErrorCode[ErrorCode["NotFound"] = 404] = "NotFound";
 	    ErrorCode[ErrorCode["Unauthorized"] = 401] = "Unauthorized";
 	    ErrorCode[ErrorCode["Unknown"] = 500] = "Unknown";
 	    ErrorCode[ErrorCode["NullData"] = 600] = "NullData";
-	})(exports.ErrorCode || (exports.ErrorCode = {}));
-	var ErrorCode = exports.ErrorCode;
+	})(ErrorCode = exports.ErrorCode || (exports.ErrorCode = {}));
 
 	var TorstenClientError = function (_Error) {
 	    _inherits(TorstenClientError, _Error);
@@ -1598,6 +1635,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return _this2;
 	    }
 
+	    _createClass(TorstenJSONError, [{
+	        key: "toJSON",
+	        value: function toJSON() {
+	            return {
+	                code: this.code,
+	                message: this.message,
+	                data: this.json
+	            };
+	        }
+	    }]);
+
 	    return TorstenJSONError;
 	}(TorstenClientError);
 
@@ -1608,13 +1656,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.createError = createError;
 
 /***/ },
-/* 13 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 
-	var orange_request_1 = __webpack_require__(14);
-	var utils_1 = __webpack_require__(10);
+	var orange_request_1 = __webpack_require__(15);
+	var utils_1 = __webpack_require__(11);
 	function request(method, url, r) {
 	    var req = new orange_request_1.HttpRequest(method, url);
 	    if (r.params) req.params(r.params);
@@ -1623,35 +1671,36 @@ return /******/ (function(modules) { // webpackBootstrap
 	        req.header("User-Agent", "torsten-client/0.0.1");
 	    }
 	    req.header("Authorization", "Bearer " + r.token);
+	    if (method === orange_request_1.HttpMethod.POST || method === orange_request_1.HttpMethod.PUT) {
+	        req.uploadProgress(r.progress);
+	        return _upload(req, r);
+	    }
 	    return req.downloadProgress(r.progress).end(r.data).then(function (res) {
 	        return res;
 	    });
 	}
 	exports.request = request;
-	function upload(url, r, data) {
-	    var req = new orange_request_1.HttpRequest(orange_request_1.HttpMethod.POST, url);
-	    req.uploadProgress(r.progress);
-	    if (r.params) req.params(r.params);
-	    if (r.headers) req.header(r.headers);
-	    var mimeType = void 0;
-	    if (utils_1.isNode) {
-	        req.header("User-Agent", "torsten-client/0.0.1");
-	    }
-	    req.header("Authorization", "Bearer " + r.token);
+	function _upload(req, options) {
+	    var mimeType = void 0,
+	        length = void 0,
+	        data = options.data;
 	    if (utils_1.isString(data)) {
-	        req.header('Content-Length', "" + data.length);
-	        mimeType = r.mime || "text/plain";
+	        length = data.length;
+	        mimeType = options.mime || "text/plain";
 	    } else if (utils_1.isBuffer(data)) {
-	        req.header('Content-Length', "" + data.length);
+	        length = data.length;
+	        mimeType = options.mime || "text/plain";
 	    } else if (utils_1.isObject(data) && !utils_1.isFile(data) && !utils_1.isFormData(data) && !utils_1.isReadableStream(data)) {
 	        try {
-	            console.log('stringi', utils_1.isReadableStream(data));
 	            data = JSON.stringify(data);
-	            req.header('Content-Length', data.length);
+	            length = data.length;
 	            mimeType = "application/json";
 	        } catch (e) {
 	            return Promise.reject(e);
 	        }
+	    }
+	    if (length) {
+	        req.header('Content-Length', "" + length);
 	    }
 	    if (utils_1.isFile(data)) {
 	        var form = new FormData();
@@ -1663,10 +1712,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    return req.end(data);
 	}
-	exports.upload = upload;
 
 /***/ },
-/* 14 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -1684,8 +1732,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (!exports.hasOwnProperty(p)) exports[p] = m[p];
 	    }
 	}
-	var base_http_request_1 = __webpack_require__(15);
-	var browser_fetch_1 = __webpack_require__(19);
+	var base_http_request_1 = __webpack_require__(16);
+	var browser_fetch_1 = __webpack_require__(20);
 
 	var HttpRequest = function (_base_http_request_1$) {
 	    _inherits(HttpRequest, _base_http_request_1$);
@@ -1707,17 +1755,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	}(base_http_request_1.BaseHttpRequest);
 
 	exports.HttpRequest = HttpRequest;
-	var utils_1 = __webpack_require__(16);
+	var utils_1 = __webpack_require__(17);
 	exports.queryStringToParams = utils_1.queryStringToParams;
 	exports.isValid = utils_1.isValid;
 	exports.isNode = utils_1.isNode;
 	exports.queryParam = utils_1.queryParam;
-	__export(__webpack_require__(20));
-	__export(__webpack_require__(17));
-	__export(__webpack_require__(22));
-	var base_http_request_2 = __webpack_require__(15);
+	__export(__webpack_require__(21));
+	__export(__webpack_require__(18));
+	__export(__webpack_require__(23));
+	var base_http_request_2 = __webpack_require__(16);
 	exports.HttpMethod = base_http_request_2.HttpMethod;
-	var base_http_request_3 = __webpack_require__(15);
+	exports.HttpError = base_http_request_2.HttpError;
+	var base_http_request_3 = __webpack_require__(16);
 	function get(url) {
 	    return new HttpRequest(base_http_request_3.HttpMethod.GET, url);
 	}
@@ -1744,7 +1793,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.head = head;
 
 /***/ },
-/* 15 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -1753,9 +1802,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	var orange_1 = __webpack_require__(2);
-	var utils_1 = __webpack_require__(16);
-	var header_1 = __webpack_require__(17);
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var orange_1 = __webpack_require__(3);
+	var utils_1 = __webpack_require__(17);
+	var header_1 = __webpack_require__(18);
 	(function (HttpMethod) {
 	    HttpMethod[HttpMethod["GET"] = 0] = "GET";
 	    HttpMethod[HttpMethod["PUT"] = 1] = "PUT";
@@ -1766,6 +1819,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	})(exports.HttpMethod || (exports.HttpMethod = {}));
 	var HttpMethod = exports.HttpMethod;
 
+	var HttpError = function (_Error) {
+	    _inherits(HttpError, _Error);
+
+	    function HttpError(response) {
+	        _classCallCheck(this, HttpError);
+
+	        var _this = _possibleConstructorReturn(this, (HttpError.__proto__ || Object.getPrototypeOf(HttpError)).call(this));
+
+	        _this.response = response;
+	        _this.status = response.status;
+	        _this.statusText = response.statusText;
+	        return _this;
+	    }
+
+	    return HttpError;
+	}(Error);
+
+	exports.HttpError = HttpError;
+
 	var BaseHttpRequest = function () {
 	    function BaseHttpRequest(_method, _url) {
 	        _classCallCheck(this, BaseHttpRequest);
@@ -1774,6 +1846,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this._url = _url;
 	        this._params = {};
 	        this._headers = new header_1.Headers();
+	        //private _body: any;
 	        this._request = {};
 	        if (!utils_1.isNode) {
 	            this._headers.append('X-Requested-With', 'XMLHttpRequest');
@@ -1824,24 +1897,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }, {
 	        key: 'json',
 	        value: function json(data) {
+	            var throwOnInvalid = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
 	            this.header('content-type', 'application/json; charset=utf-8');
 	            if (!orange_1.isString(data)) {
 	                data = JSON.stringify(data);
 	            }
-	            return this.end(data).then(function (res) {
+	            return this.end(data, throwOnInvalid).then(function (res) {
 	                return res.json();
 	            });
 	        }
 	    }, {
 	        key: 'text',
 	        value: function text(data) {
-	            return this.end(data).then(function (r) {
+	            var throwOnInvalid = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+	            return this.end(data, throwOnInvalid).then(function (r) {
 	                return r.text();
 	            });
 	        }
 	    }, {
 	        key: 'end',
 	        value: function end(data) {
+	            var throwOnInvalid = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
 	            var url = this._url;
 	            if (data && data === Object(data) && this._method == HttpMethod.GET /* && check for content-type */) {
 	                    var sep = url.indexOf('?') === -1 ? '?' : '&';
@@ -1853,11 +1932,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	            url = this._apply_params(url);
 	            this._request.headers = this._headers;
-	            /*return fetch(url, this._request)
-	            .then((res: Response) => {
+	            return this._fetch(url, this._request).then(function (res) {
+	                if (!res.isValid && throwOnInvalid) {
+	                    throw new HttpError(res);
+	                }
 	                return res;
-	            });*/
-	            return this._fetch(url, this._request);
+	            });
 	        }
 	    }, {
 	        key: 'then',
@@ -1893,7 +1973,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.BaseHttpRequest = BaseHttpRequest;
 
 /***/ },
-/* 16 */
+/* 17 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -1937,7 +2017,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	;
 
 /***/ },
-/* 17 */
+/* 18 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -1946,7 +2026,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	var support_1 = __webpack_require__(18);
+	var support_1 = __webpack_require__(19);
 	function normalizeName(name) {
 	    if (typeof name !== 'string') {
 	        name = String(name);
@@ -1980,12 +2060,20 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var Headers = function () {
 	    function Headers(headers) {
+	        var _this = this;
+
 	        _classCallCheck(this, Headers);
 
 	        this.map = {};
 	        if (headers instanceof Headers) {
+	            var _loop = function _loop(key) {
+	                headers.map[key].forEach(function (v) {
+	                    return _this.append(key, v);
+	                });
+	            };
+
 	            for (var key in headers.map) {
-	                this.append(key, headers.map[key]);
+	                _loop(key);
 	            }
 	        } else if (headers) {
 	            var names = Object.getOwnPropertyNames(headers);
@@ -2082,12 +2170,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.Headers = Headers;
 
 /***/ },
-/* 18 */
+/* 19 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 
-	var utils_1 = __webpack_require__(16);
+	var utils_1 = __webpack_require__(17);
 	var self = utils_1.isNode ? global : window;
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.default = {
@@ -2106,7 +2194,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 
 /***/ },
-/* 19 */
+/* 20 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -2119,11 +2207,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var orange_1 = __webpack_require__(2);
-	var header_1 = __webpack_require__(17);
-	var request_1 = __webpack_require__(20);
-	var base_response_1 = __webpack_require__(21);
-	var support_1 = __webpack_require__(18);
+	var orange_1 = __webpack_require__(3);
+	var header_1 = __webpack_require__(18);
+	var request_1 = __webpack_require__(21);
+	var base_response_1 = __webpack_require__(22);
+	var support_1 = __webpack_require__(19);
 	function headers(xhr) {
 	    var head = new header_1.Headers();
 	    var pairs = (xhr.getAllResponseHeaders() || '').trim().split('\n');
@@ -2218,7 +2306,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.fetch = fetch;
 
 /***/ },
-/* 20 */
+/* 21 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -2227,7 +2315,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	var header_1 = __webpack_require__(17);
+	var header_1 = __webpack_require__(18);
 	// HTTP methods whose capitalization should be normalized
 	var methods = ['DELETE', 'GET', 'HEAD', 'OPTIONS', 'POST', 'PUT'];
 	function normalizeMethod(method) {
@@ -2241,7 +2329,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var Request = function () {
 	    function Request(input) {
-	        var options = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+	        var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
 	        _classCallCheck(this, Request);
 
@@ -2284,7 +2372,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.Request = Request;
 
 /***/ },
-/* 21 */
+/* 22 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -2293,11 +2381,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	var header_1 = __webpack_require__(17);
-	var support_1 = __webpack_require__(18);
-	var orange_1 = __webpack_require__(2);
-	var utils_1 = __webpack_require__(16);
-	var types_1 = __webpack_require__(22);
+	var header_1 = __webpack_require__(18);
+	var support_1 = __webpack_require__(19);
+	var orange_1 = __webpack_require__(3);
+	var utils_1 = __webpack_require__(17);
+	var types_1 = __webpack_require__(23);
 	function decode(body) {
 	    var form = new FormData();
 	    body.trim().split('&').forEach(function (bytes) {
@@ -2337,7 +2425,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    reader.readAsText(blob);
 	    return fileReaderReady(reader);
 	}
-	var redirectStatuses = [301, 302, 303, 307, 308];
+	//var redirectStatuses = [301, 302, 303, 307, 308]
 
 	var BaseResponse = function () {
 	    function BaseResponse(body, options) {
@@ -2464,7 +2552,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.BaseResponse = BaseResponse;
 
 /***/ },
-/* 22 */
+/* 23 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -2477,26 +2565,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    BodyType[BodyType["None"] = 4] = "None";
 	})(exports.BodyType || (exports.BodyType = {}));
 	var BodyType = exports.BodyType;
-	;
-
-/***/ },
-/* 23 */
-/***/ function(module, exports) {
-
-	"use strict";
-
-	(function (FileMode) {
-	    FileMode[FileMode["UserRead"] = 256] = "UserRead";
-	    FileMode[FileMode["UserWrite"] = 128] = "UserWrite";
-	    FileMode[FileMode["UserDelete"] = 64] = "UserDelete";
-	    FileMode[FileMode["GroupRead"] = 32] = "GroupRead";
-	    FileMode[FileMode["GroupWrite"] = 16] = "GroupWrite";
-	    FileMode[FileMode["GroupDelete"] = 8] = "GroupDelete";
-	    FileMode[FileMode["OtherRead"] = 4] = "OtherRead";
-	    FileMode[FileMode["OtherWriter"] = 2] = "OtherWriter";
-	    FileMode[FileMode["OtherDelete"] = 0] = "OtherDelete";
-	})(exports.FileMode || (exports.FileMode = {}));
-	var FileMode = exports.FileMode;
 	;
 
 /***/ }

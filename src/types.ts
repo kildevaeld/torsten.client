@@ -1,6 +1,3 @@
-import {IPromise} from 'orange';
-import {HttpMethod} from 'orange.request';
-
 
 export enum FileMode {
     UserRead = 256, UserWrite = 128, UserDelete = 64,
@@ -13,14 +10,18 @@ export interface TorstenResponse {
     data?: any;
 }
 
+export namespace constants {
+    export const MessageOK = "ok";
+}
+
 export interface IClient {
     endpoint: string;
     token: string;
-    create(path:string, data:any, options:CreateOptions): IPromise<IFileInfo>;
-    open(path: string, options:OpenOptions): IPromise<Blob>;
-    stat(path:string, options?:GetOptions): IPromise<IFileInfo>;
-    list(path:string, options?:ListOptions): IPromise<IFileInfo[]>;
-    remove(path: string, options?: RemoveOptions): IPromise<TorstenResponse>
+    create(path: string, data: any, options: CreateOptions): Promise<IFileInfo>;
+    open(path: string, options: OpenOptions): Promise<Blob>;
+    stat(path: string, options?: GetOptions): Promise<IFileInfo>;
+    list(path: string, options?: ListOptions): Promise<IFileInfo[]>;
+    remove(path: string, options?: RemoveOptions): Promise<TorstenResponse>
 }
 
 export interface Request {
@@ -32,10 +33,6 @@ export interface Request {
     progress?: (e: ProgressEvent) => void;
 }
 
-export interface Requester {
-    request(method:HttpMethod, url:string, req:Request, data:any): IPromise<any>
-    upload(url:string, req:Request): Promise<any>
-}
 
 export interface IFileInfo {
     id: string;
@@ -56,28 +53,28 @@ export interface CreateOptions {
     size?: number;
     mode?: FileMode;
     meta?: any;
-    progress?: (e:ProgressEvent) => void
+    progress?: (e: ProgressEvent) => void
 }
 
 export interface GetOptions {
-    progress?: (e:ProgressEvent) => void
+    progress?: (e: ProgressEvent) => void
 }
 
 export interface OpenOptions extends GetOptions {
-    stream?:boolean
-    thumbnail?:boolean;
+    stream?: boolean
+    thumbnail?: boolean;
 }
 
 export interface ListOptions {
-    page?:number;
-    limit?:number;
-    progress?: (e:ProgressEvent) => void
+    page?: number;
+    limit?: number;
+    progress?: (e: ProgressEvent) => void
     raw?: boolean;
 }
 
-export interface RemoveOptions {}
+export interface RemoveOptions { }
 
 export interface TorstenClientOptions {
     endpoint: string;
-    token: string;
+    token?: string;
 }

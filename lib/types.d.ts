@@ -1,5 +1,3 @@
-import { IPromise } from 'orange';
-import { HttpMethod } from 'orange.request';
 export declare enum FileMode {
     UserRead = 256,
     UserWrite = 128,
@@ -15,14 +13,17 @@ export interface TorstenResponse {
     message: string;
     data?: any;
 }
+export declare namespace constants {
+    const MessageOK = "ok";
+}
 export interface IClient {
     endpoint: string;
     token: string;
-    create(path: string, data: any, options: CreateOptions): IPromise<IFileInfo>;
-    open(path: string, options: OpenOptions): IPromise<Blob>;
-    stat(path: string, options?: GetOptions): IPromise<IFileInfo>;
-    list(path: string, options?: ListOptions): IPromise<IFileInfo[]>;
-    remove(path: string, options?: RemoveOptions): IPromise<TorstenResponse>;
+    create(path: string, data: any, options: CreateOptions): Promise<IFileInfo>;
+    open(path: string, options: OpenOptions): Promise<Blob>;
+    stat(path: string, options?: GetOptions): Promise<IFileInfo>;
+    list(path: string, options?: ListOptions): Promise<IFileInfo[]>;
+    remove(path: string, options?: RemoveOptions): Promise<TorstenResponse>;
 }
 export interface Request {
     mime?: string;
@@ -31,10 +32,6 @@ export interface Request {
     data?: any;
     size?: number;
     progress?: (e: ProgressEvent) => void;
-}
-export interface Requester {
-    request(method: HttpMethod, url: string, req: Request, data: any): IPromise<any>;
-    upload(url: string, req: Request): Promise<any>;
 }
 export interface IFileInfo {
     id: string;
@@ -73,5 +70,5 @@ export interface RemoveOptions {
 }
 export interface TorstenClientOptions {
     endpoint: string;
-    token: string;
+    token?: string;
 }

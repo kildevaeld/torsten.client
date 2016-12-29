@@ -1,14 +1,14 @@
-import {IPromise, Promise} from 'orange'
+import { IPromise, Promise } from 'orange'
 
 export declare class Buffer {
     static isBuffer(a): boolean;
     length: number;
 }
-export class ReadableStream { }
+export declare class ReadableStream { }
 export const isNode = !(new Function("try {return this===window;}catch(e){ return false;}"))();
 
 
-export {isObject, isString, isFunction} from 'orange'
+export { isObject, isString, isFunction } from 'orange'
 
 export function isBuffer(a: any): a is Buffer {
     if (isNode) Buffer.isBuffer(a)
@@ -107,12 +107,7 @@ export module filemode {
                 w++
             }
         }
-        /*for i, c := range str {
-            if m&(1<<uint(32-1-i)) != 0 {
-                buf[w] = byte(c)
-                w++
-            }
-        }*/
+
         if (w == 0) {
             buf[w] = '-'
             w++
@@ -128,8 +123,8 @@ export module filemode {
             }
             w++
         }
-        
 
-        return buf.slice(0,w).join('');
+
+        return buf.slice(0, w).join('');
     }
 }

@@ -1,24 +1,16 @@
 import {
     TorstenClientOptions, CreateOptions, GetOptions, ListOptions,
-    Requester, OpenOptions, IFileInfo, IClient, TorstenResponse
+    OpenOptions, IFileInfo, IClient, TorstenResponse,
+    constants
 } from './types';
-import { extend, isObject, IPromise } from 'orange';
-import { isString, isFormData, isReadableStream, isNode, isBuffer } from './utils';
+import { extend } from 'orange';
+import { isNode } from './utils';
 import { FileInfo } from './file-info';
 import { createError, TorstenJSONError, ErrorCode } from './error';
 
 import * as request from './request'
 import { HttpMethod, Response } from 'orange.request';
 
-
-interface Request {
-    mime?: string;
-    headers?: any
-    params?: any
-    data?: any;
-    size?: number;
-    progress?: (e: ProgressEvent) => void;
-}
 
 interface IMessage {
     message: string;
@@ -28,21 +20,22 @@ interface IMessage {
 
 function validateConfig(options: TorstenClientOptions) {
     if (options == null) throw createError(0, "options");
+    if (options.endpoint == null) throw createError(0, "needs endpoint");
 
 }
 
 
-
 export class TorstenClient implements IClient {
     private _options: TorstenClientOptions;
+
     constructor(options: TorstenClientOptions) {
         validateConfig(options);
         this._options = options;
         if (options.token) this.token = options.token;
     }
 
-
     private _token;
+
     set token(token: string) {
         this._token = token;
     }
@@ -55,11 +48,13 @@ export class TorstenClient implements IClient {
         return this._options.endpoint;
     }
 
-    create(path: string, data: any, options: CreateOptions = {}): IPromise<IFileInfo> {
-        if (data == null) return Promise.reject<IFileInfo>(createError(ErrorCode.NullData, "no data"))
+    create(path: string, data: any, options: CreateOptions = {}): Promise<FileInfo> {
+        this._check_token();
+        if (data == null) return Promise.reject<FileInfo>(createError(ErrorCode.NullData, "no data"))
 
         let req: request.TorstenRequest = extend({}, options, {
-            token: this.token
+            token: this.token,
+            data: data
         });
 
         if (options.mode) {
@@ -70,20 +65,21 @@ export class TorstenClient implements IClient {
             (req.params = req.params || {}).meta = JSON.stringify(options.meta);
         }
 
-        return request.upload(this._toUrl(path), req, data)
+        return request.request(HttpMethod.POST, this._toUrl(path), req)
             .then(getResponse)
             .then(res => res.json<IMessage>())
             .then(json => {
-                if (json.message != "ok") {
+                if (json.message != constants.MessageOK) {
                     throw createError(ErrorCode.Unknown, "invalid response: " + json.message);
                 }
-                return json.data;
+                return new FileInfo(json.data);
             })
     }
 
 
 
-    stat(path: string, options: GetOptions = {}): IPromise<IFileInfo> {
+    stat(path: string, options: GetOptions = {}): Promise<FileInfo> {
+        this._check_token();
 
         let url = this._toUrl(path);
         return request.request(HttpMethod.GET, url, {
@@ -96,7 +92,9 @@ export class TorstenClient implements IClient {
 
     }
 
-    statById(id: string, options: GetOptions = {}): IPromise<IFileInfo> {
+    statById(id: string, options: GetOptions = {}): Promise<FileInfo> {
+        this._check_token();
+
         return request.request(HttpMethod.GET, this._toUrl('/'), {
             progress: options.progress,
             params: { stat: true, id: id },
@@ -106,7 +104,8 @@ export class TorstenClient implements IClient {
         }).then(i => new FileInfo(i.data))
     }
 
-    list(path: string, options: ListOptions = {}): IPromise<IFileInfo[]> {
+    list(path: string, options: ListOptions = {}): Promise<FileInfo[]> {
+        this._check_token();
 
         var req = request.request(HttpMethod.GET, this._toUrl(path), extend({}, options, {
             token: this._token
@@ -119,34 +118,38 @@ export class TorstenClient implements IClient {
     }
 
 
-    open(path: string, options: OpenOptions = {}): IPromise<any> {
-        return this.stat(path, extend({}, options, {
-            token: this._token
-        }))
-            .then<any>(info => {
+    open(path: string | FileInfo, options: OpenOptions = {}): Promise<any> {
+        this._check_token();
 
-                let r: request.TorstenRequest = {
-                    progress: options.progress,
-                    token: this.token
-                };
-                if (options.thumbnail) {
-                    r.params = r.params || {};
-                    r.params.thumbnail = true;
-                }
+        let r: request.TorstenRequest = {
+            progress: options.progress,
+            token: this.token
+        };
+        if (options.thumbnail) {
+            r.params = r.params || {};
+            r.params.thumbnail = true;
+        }
 
-                return request.request(HttpMethod.GET, this._toUrl(path), r)
-                    .then(r => isNode ? r.stream() : r.blob())
+        let p: string;
+        if (path instanceof FileInfo) {
+            p = path.fullPath;
+        } else {
+            p = path;
+        }
 
-            });
+        return request.request(HttpMethod.GET, this._toUrl(p), r)
+            .then(r => isNode ? r.stream() : r.blob())
     }
 
-    remove(path: string): IPromise<TorstenResponse> {
+    remove(path: string): Promise<TorstenResponse> {
+        this._check_token();
         let url = this._toUrl(path)
         return request.request(HttpMethod.DELETE, url, {
             token: this.token
         }).then(getResponse)
-            .then(res => res.json())
+            .then(res => res.json<TorstenResponse>())
     }
+
 
     private _toUrl(path: string) {
         if (path == null) {
@@ -159,10 +162,14 @@ export class TorstenClient implements IClient {
         return this._options.endpoint + path;
     }
 
+    private _check_token() {
+        if (!this.token) throw createError(0, "no token");
+    }
+
 }
 
 
-function getResponse(res: Response): IPromise<Response> {
+function getResponse(res: Response): Promise<Response> {
 
     if (!res.isValid) {
 
@@ -178,12 +185,12 @@ function getResponse(res: Response): IPromise<Response> {
         if (/text\/plain/.test(res.headers.get('Content-Type'))) {
             return res.text().then<any>(t => {
                 return Promise.reject<Response>(createError(ErrorCode.Unknown, t));
-            })
+            }) as Promise<Response>
         } else if (/application\/json/.test(res.headers.get('Content-Type'))) {
 
             return res.json().then(json => {
-                return Promise.reject<Response>(new TorstenJSONError(ErrorCode.Unknown, "response", json));
-            });
+                return Promise.reject<Response>(new TorstenJSONError(ErrorCode.Unknown, "Unknown JSON Response", json));
+            }) as Promise<Response>;
         }
     }
 

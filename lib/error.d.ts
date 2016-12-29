@@ -9,13 +9,15 @@ export declare class TorstenClientError extends Error {
     code: ErrorCode;
     message: string;
     constructor(code: ErrorCode, message: string);
-    toJSON(): {
-        message: string;
-        code: ErrorCode;
-    };
+    toJSON(): any;
 }
 export declare class TorstenJSONError extends TorstenClientError {
     json: Object;
     constructor(code: ErrorCode, message: string, json: Object);
+    toJSON(): {
+        code: ErrorCode;
+        message: string;
+        data: Object;
+    };
 }
 export declare function createError(code: ErrorCode, msg: string): TorstenClientError;
