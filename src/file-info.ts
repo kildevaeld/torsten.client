@@ -1,6 +1,6 @@
 
 import { IFileInfo } from './types';
-import { has } from 'orange';
+import { has, pick } from 'orange';
 
 const props = ['name', 'mime', 'size', 'ctime', 'mtime', 'mode',
     'gid', 'uid', 'meta', 'path', 'is_dir', 'hidden', 'id'];
@@ -21,7 +21,8 @@ export class FileInfo implements IFileInfo {
     hidden: boolean;
 
     get fullPath() {
-        return this.path + this.name
+        if (!this.path) return this.name;
+        return this.path + (this.path[this.path.length-1] === '/' ? '' : '/') + this.name
     }
 
     constructor(attr: any = {}) {
@@ -48,9 +49,11 @@ export class FileInfo implements IFileInfo {
     }
 
     toString() {
-        return `FileInfo(name=${this.name}, mime=${this.mime})`;
+        return `FileInfo(name=${this.name}, mime=${this.mime}, size=${this.size})`;
     }
 
-
+    toJSON() {
+        return pick(this, props);
+    }
 
 }

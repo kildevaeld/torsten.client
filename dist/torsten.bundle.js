@@ -52,7 +52,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
 
@@ -61,19 +61,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (!exports.hasOwnProperty(p)) exports[p] = m[p];
 	    }
 	}
+	Object.defineProperty(exports, "__esModule", { value: true });
 	__export(__webpack_require__(1));
 	__export(__webpack_require__(2));
-	__export(__webpack_require__(13));
-	var utils_1 = __webpack_require__(11);
+	__export(__webpack_require__(12));
+	var utils_1 = __webpack_require__(10);
 	exports.readBlobAsText = utils_1.readBlobAsText;
 	exports.readBlobAsArrayBuffer = utils_1.readBlobAsArrayBuffer;
 	exports.readBlobAsDataURL = utils_1.readBlobAsDataURL;
 	exports.path = utils_1.path;
-	__export(__webpack_require__(12));
+	__export(__webpack_require__(11));
 
-/***/ },
+/***/ }),
 /* 1 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
 
@@ -81,13 +82,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+	Object.defineProperty(exports, "__esModule", { value: true });
 	var types_1 = __webpack_require__(2);
 	var orange_1 = __webpack_require__(3);
-	var utils_1 = __webpack_require__(11);
-	var file_info_1 = __webpack_require__(12);
-	var error_1 = __webpack_require__(13);
-	var request = __webpack_require__(14);
-	var orange_request_1 = __webpack_require__(15);
+	var utils_1 = __webpack_require__(10);
+	var file_info_1 = __webpack_require__(11);
+	var error_1 = __webpack_require__(12);
+	var request = __webpack_require__(13);
+	var orange_request_1 = __webpack_require__(14);
 	function validateConfig(options) {
 	    if (options == null) throw error_1.createError(0, "options");
 	    if (options.endpoint == null) throw error_1.createError(0, "needs endpoint");
@@ -104,6 +106,17 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    _createClass(TorstenClient, [{
 	        key: "create",
+
+	        /**
+	         * Add new file
+	         *
+	         * @param {string} path
+	         * @param {*} data
+	         * @param {CreateOptions} [options={}]
+	         * @returns {Promise<FileInfo>}
+	         *
+	         * @memberOf TorstenClient
+	         */
 	        value: function create(path, data) {
 	            var options = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
@@ -119,6 +132,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            if (options.meta) {
 	                (req.params = req.params || {}).meta = JSON.stringify(options.meta);
 	            }
+	            path = utils_1.slugify(path);
 	            return request.request(orange_request_1.HttpMethod.POST, this._toUrl(path), req).then(getResponse).then(function (res) {
 	                return res.json();
 	            }).then(function (json) {
@@ -128,6 +142,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	                return new file_info_1.FileInfo(json.data);
 	            });
 	        }
+	        /**
+	         * Stat returns the file info from path
+	         *
+	         * @param {string} path
+	         * @param {GetOptions} [options={}]
+	         * @returns {Promise<FileInfo>}
+	         *
+	         * @memberOf TorstenClient
+	         */
+
 	    }, {
 	        key: "stat",
 	        value: function stat(path) {
@@ -145,6 +169,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	                return new file_info_1.FileInfo(i.data);
 	            });
 	        }
+	        /**
+	         * StatById return the file info from id
+	         *
+	         * @param {string} id
+	         * @param {GetOptions} [options={}]
+	         * @returns {Promise<FileInfo>}
+	         *
+	         * @memberOf TorstenClient
+	         */
+
 	    }, {
 	        key: "statById",
 	        value: function statById(id) {
@@ -179,6 +213,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	                });
 	            });
 	        }
+	        /**
+	         * Open opens a file for reading.
+	         * When running on node a ReadableStream will be returned
+	         * A blob when running in the browser
+	         *
+	         * @param {(string | FileInfo)} path
+	         * @param {OpenOptions} [options={}]
+	         * @returns {Promise<any>}
+	         *
+	         * @memberOf TorstenClient
+	         */
+
 	    }, {
 	        key: "open",
 	        value: function open(path) {
@@ -203,6 +249,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	                return utils_1.isNode ? r.stream() : r.blob();
 	            });
 	        }
+	        /**
+	         * Remove a file at path
+	         *
+	         * @param {string} path
+	         * @returns {Promise<TorstenResponse>}
+	         *
+	         * @memberOf TorstenClient
+	         */
+
 	    }, {
 	        key: "remove",
 	        value: function remove(path) {
@@ -273,12 +328,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return Promise.resolve(res);
 	}
 
-/***/ },
+/***/ }),
 /* 2 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	"use strict";
 
+	Object.defineProperty(exports, "__esModule", { value: true });
 	var FileMode;
 	(function (FileMode) {
 	    FileMode[FileMode["UserRead"] = 256] = "UserRead";
@@ -297,9 +353,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    constants.MessageOK = "ok";
 	})(constants = exports.constants || (exports.constants = {}));
 
-/***/ },
+/***/ }),
 /* 3 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
 
@@ -314,15 +370,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	__export(__webpack_require__(6));
 	__export(__webpack_require__(9));
 	__export(__webpack_require__(7));
-	__export(__webpack_require__(10));
+	//export * from './map';
 
-/***/ },
+/***/ }),
 /* 4 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	"use strict";
 
-	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+	var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 	function isObject(obj) {
 	    return obj === Object(obj);
@@ -358,7 +414,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @return { string }
 	 */
 	function uniqueId() {
-	    var prefix = arguments.length <= 0 || arguments[0] === undefined ? '' : arguments[0];
+	    var prefix = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
 
 	    return prefix + ++idCounter;
 	}
@@ -538,9 +594,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	;
 
-/***/ },
+/***/ }),
 /* 5 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
 
@@ -578,7 +634,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	exports.bind = bind;
 	function callFunc(fn, ctx) {
-	    var args = arguments.length <= 2 || arguments[2] === undefined ? [] : arguments[2];
+	    var args = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
 
 	    switch (args.length) {
 	        case 0:
@@ -640,112 +696,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	exports.inherits = inherits;
 
-/***/ },
+/***/ }),
 /* 6 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	"use strict";
-	/*class KeyValuePair<K, V> {
-	    key: K;
-	    value: V;
-	    constructor(key: K, value: V) {
-	        this.key = key;
-	        this.value = value;
-	    }
-	}
-	export class Map<K, V> { // class MapDDD<K,V> implements Map
-	    // -------------- Fields -----------------------
-	    private keyAndValues: Array<KeyValuePair<K, V>>;
-	    // ---------------------------------------------
-	    constructor() {
-	        this.keyAndValues = [];
-	    }
-	    // --- Public Methods ---
-	    getKeysOfValue(value: V) {
-	        var keysToReturn: Array<K> = [];
-	        var valueToFind = value;
-	        this.keyAndValues.forEach(function (value: KeyValuePair<K, V>, index: number, array: KeyValuePair<K, V>[]): void {
-	            if (value.value === valueToFind) {
-	                keysToReturn.push(value.key);
-	            }
-	        });
-	        return keysToReturn;
-	    }
-
-	    // Standard:
-	    clear(): void {
-	        this.keyAndValues = [];
-	    }
-	    delete(key: K): boolean {
-	        var found = false;
-	        this.keyAndValues.forEach(function (value: KeyValuePair<K, V>, index: number, array: KeyValuePair<K, V>[]): void {
-	            if (found) return;
-	            if (key === value.key) {
-	                array = array.slice(0, index).concat(array.slice(index + 1));
-	                found = true;
-	            }
-	        });
-	        return found;
-	    }
-	    forEach(callbackfn: (value: V, key: K, map: Map<K, V>) => void, thisArg?: any): void {
-	        this.keyAndValues.forEach(function (value: KeyValuePair<K, V>, index: number, array: KeyValuePair<K, V>[]): void {
-	            callbackfn.apply(thisArg, [value.value, value.key, this]);
-	        }, this);
-	    }
-	    get(key: K): V {
-	        var valueToReturn: V = undefined;
-	        this.keyAndValues.forEach(function (value: KeyValuePair<K, V>, index: number, array: KeyValuePair<K, V>[]): void {
-	            if (valueToReturn !== undefined) return;
-	            if (key === value.key) {
-	                valueToReturn = value.value;
-	            }
-	        });
-	        return valueToReturn;
-	    }
-	    has(key: K): boolean {
-	        var found = false;
-	        this.keyAndValues.forEach(function (value: KeyValuePair<K, V>, index: number, array: KeyValuePair<K, V>[]): void {
-	            if (found) return;
-	            if (key === value.key) {
-	                found = true;
-	            }
-	        });
-	        return found;
-	    }
-	    set(key: K, value: V): Map<K, V> {
-	        var found = false;
-	        var valueToSet = value;
-	        this.keyAndValues.forEach(function (value: KeyValuePair<K, V>, index: number, array: KeyValuePair<K, V>[]): void {
-	            if (found) return;
-	            if (key === value.key) {
-	                found = true;
-	                value.value = valueToSet;
-	            }
-	        });
-	        if (!found) {
-	            this.keyAndValues.push(new KeyValuePair<K, V>(key, valueToSet));
-	        }
-	        return this;
-	    }
-	    // ----------------------
-
-	    // Getters:
-	    // Standard:
-	    get size() {
-	        return this.keyAndValues.length;
-	    }
-	}*/
 	// Return a new array with duplicates removed
 
 	function unique(array) {
 	    var seen = new Map();
 	    return array.filter(function (e, i) {
 	        if (seen.has(e)) return false;
-	        /*for (i += 1; i < array.length; i += 1) {
-	          if (equal(e, array[i])) {
-	            return false;
-	          }
-	        }*/
 	        seen.set(e, true);
 	        return true;
 	    });
@@ -806,9 +767,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	exports.sortBy = sortBy;
 
-/***/ },
+/***/ }),
 /* 7 */
-/***/ function(module, exports) {
+/***/ (function(module, exports) {
 
 	"use strict";
 
@@ -825,7 +786,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	exports.truncate = truncate;
 	function humanFileSize(bytes) {
-	    var si = arguments.length <= 1 || arguments[1] === undefined ? false : arguments[1];
+	    var si = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
 
 	    var thresh = si ? 1000 : 1024;
 	    if (Math.abs(bytes) < thresh) {
@@ -841,9 +802,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	exports.humanFileSize = humanFileSize;
 
-/***/ },
+/***/ }),
 /* 8 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
 
@@ -857,7 +818,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 * @return {Object}      Shallow object with path names e.g. { 'level1.level2': 'value' }
 	 */
 	function objToPaths(obj) {
-	    var separator = arguments.length <= 1 || arguments[1] === undefined ? "." : arguments[1];
+	    var separator = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : ".";
 
 	    var ret = {};
 	    for (var key in obj) {
@@ -1045,9 +1006,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	exports.intersection = intersection;
 
-/***/ },
+/***/ }),
 /* 9 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
 
@@ -1168,7 +1129,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.delay = delay;
 	;
 	function eachAsync(array, iterator, context) {
-	    var accumulate = arguments.length <= 3 || arguments[3] === undefined ? false : arguments[3];
+	    var accumulate = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
 
 	    return mapAsync(array, iterator, context, accumulate).then(function () {
 	        return void 0;
@@ -1176,7 +1137,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	exports.eachAsync = eachAsync;
 	function mapAsync(array, iterator, context) {
-	    var accumulate = arguments.length <= 3 || arguments[3] === undefined ? false : arguments[3];
+	    var accumulate = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
 
 	    return new exports.Promise(function (resolve, reject) {
 	        var i = 0,
@@ -1203,196 +1164,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	exports.mapAsync = mapAsync;
 
-/***/ },
+/***/ }),
 /* 10 */
-/***/ function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
 
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	var _charMap;
 
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-	var self = typeof window === 'undefined' ? global : window;
-	var iterable = 'Symbol' in self && 'iterator' in Symbol;
-	// Build a destructive iterator for the value list
-	function iteratorFor(items) {
-	    var iterator = {
-	        next: function next() {
-	            var value = items.shift();
-	            return { done: value === undefined, value: value };
-	        }
-	    };
-	    if (iterable) {
-	        iterator[Symbol.iterator] = function () {
-	            return iterator;
-	        };
-	    }
-	    return iterator;
-	}
-
-	var KeyValuePair = function KeyValuePair(key, value) {
-	    _classCallCheck(this, KeyValuePair);
-
-	    this.key = key;
-	    this.value = value;
-	};
-
-	var MapShim = function () {
-	    // ---------------------------------------------
-	    function MapShim() {
-	        _classCallCheck(this, MapShim);
-
-	        this.keyAndValues = [];
-	    }
-	    // --- Public Methods ---
-
-
-	    _createClass(MapShim, [{
-	        key: 'getKeysOfValue',
-	        value: function getKeysOfValue(value) {
-	            var keysToReturn = [];
-	            var valueToFind = value;
-	            this.keyAndValues.forEach(function (value, index, array) {
-	                if (value.value === valueToFind) {
-	                    keysToReturn.push(value.key);
-	                }
-	            });
-	            return keysToReturn;
-	        }
-	        // Standard:
-
-	    }, {
-	        key: 'clear',
-	        value: function clear() {
-	            this.keyAndValues = [];
-	        }
-	    }, {
-	        key: 'delete',
-	        value: function _delete(key) {
-	            var found = false;
-	            this.keyAndValues.forEach(function (value, index, array) {
-	                if (found) return;
-	                if (key === value.key) {
-	                    array = array.slice(0, index).concat(array.slice(index + 1));
-	                    found = true;
-	                }
-	            });
-	            return found;
-	        }
-	    }, {
-	        key: 'forEach',
-	        value: function forEach(callbackfn, thisArg) {
-	            this.keyAndValues.forEach(function (value, index, array) {
-	                callbackfn.apply(thisArg, [value.value, value.key, this]);
-	            }, this);
-	        }
-	    }, {
-	        key: 'get',
-	        value: function get(key) {
-	            var valueToReturn = undefined;
-	            this.keyAndValues.forEach(function (value, index, array) {
-	                if (valueToReturn !== undefined) return;
-	                if (key === value.key) {
-	                    valueToReturn = value.value;
-	                }
-	            });
-	            return valueToReturn;
-	        }
-	    }, {
-	        key: 'has',
-	        value: function has(key) {
-	            var found = false;
-	            this.keyAndValues.forEach(function (value, index, array) {
-	                if (found) return;
-	                if (key === value.key) {
-	                    found = true;
-	                }
-	            });
-	            return found;
-	        }
-	    }, {
-	        key: 'set',
-	        value: function set(key, value) {
-	            var found = false;
-	            var valueToSet = value;
-	            this.keyAndValues.forEach(function (value, index, array) {
-	                if (found) return;
-	                if (key === value.key) {
-	                    found = true;
-	                    value.value = valueToSet;
-	                }
-	            });
-	            if (!found) {
-	                this.keyAndValues.push(new KeyValuePair(key, valueToSet));
-	            }
-	            return this;
-	        }
-	    }, {
-	        key: 'keys',
-	        value: function keys() {
-	            var items = [];
-	            this.forEach(function (value, name) {
-	                items.push(name);
-	            });
-	            return iteratorFor(items);
-	        }
-	    }, {
-	        key: 'values',
-	        value: function values() {
-	            var items = [];
-	            this.forEach(function (value) {
-	                items.push(value);
-	            });
-	            return iteratorFor(items);
-	        }
-	    }, {
-	        key: 'entries',
-	        value: function entries() {
-	            var items = [];
-	            this.forEach(function (value, name) {
-	                items.push([name, value]);
-	            });
-	            return iteratorFor(items);
-	        }
-	        // ----------------------
-	        // Getters:
-	        // Standard:
-
-	    }, {
-	        key: Symbol.iterator,
-	        value: function value() {
-	            return this.entries();
-	        }
-	    }, {
-	        key: 'size',
-	        get: function get() {
-	            return this.keyAndValues.length;
-	        }
-	    }]);
-
-	    return MapShim;
-	}();
-
-	if (!self.Map) {
-	    self.Map = MapShim;
-	}
-	exports.Map = self.Map;
-
-/***/ },
-/* 11 */
-/***/ function(module, exports, __webpack_require__) {
-
-	"use strict";
+	function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
+	Object.defineProperty(exports, "__esModule", { value: true });
 	var orange_1 = __webpack_require__(3);
-	exports.isNode = !new Function("try {return this===window;}catch(e){ return false;}")();
 	var orange_2 = __webpack_require__(3);
 	exports.isObject = orange_2.isObject;
 	exports.isString = orange_2.isString;
 	exports.isFunction = orange_2.isFunction;
+	exports.isNode = !new Function("try {return this===window;}catch(e){ return false;}")();
 	function isBuffer(a) {
 	    if (exports.isNode) Buffer.isBuffer(a);
 	    return false;
@@ -1512,10 +1302,55 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	    filemode.toString = toString;
 	})(filemode = exports.filemode || (exports.filemode = {}));
+	var charMap = (_charMap = {
+	    // latin
+	    'À': 'A', 'Á': 'A', 'Â': 'A', 'Ã': 'A', 'Ä': 'A', 'Å': 'A', 'Æ': 'AE',
+	    'Ç': 'C', 'È': 'E', 'É': 'E', 'Ê': 'E', 'Ë': 'E', 'Ì': 'I', 'Í': 'I',
+	    'Î': 'I', 'Ï': 'I', 'Ð': 'D', 'Ñ': 'N', 'Ò': 'O', 'Ó': 'O', 'Ô': 'O',
+	    'Õ': 'O', 'Ö': 'O', 'Ő': 'O', 'Ø': 'O', 'Ù': 'U', 'Ú': 'U', 'Û': 'U',
+	    'Ü': 'U', 'Ű': 'U', 'Ý': 'Y', 'Þ': 'TH', 'ß': 'ss', 'à': 'a', 'á': 'a',
+	    'â': 'a', 'ã': 'a', 'ä': 'a', 'å': 'a', 'æ': 'ae', 'ç': 'c', 'è': 'e',
+	    'é': 'e', 'ê': 'e', 'ë': 'e', 'ì': 'i', 'í': 'i', 'î': 'i', 'ï': 'i',
+	    'ð': 'd', 'ñ': 'n', 'ò': 'o', 'ó': 'o', 'ô': 'o', 'õ': 'o', 'ö': 'o',
+	    'ő': 'o', 'ø': 'o', 'ù': 'u', 'ú': 'u', 'û': 'u', 'ü': 'u', 'ű': 'u',
+	    'ý': 'y', 'þ': 'th', 'ÿ': 'y', 'ẞ': 'SS',
+	    // greek
+	    'α': 'a', 'β': 'b', 'γ': 'g', 'δ': 'd', 'ε': 'e', 'ζ': 'z', 'η': 'h', 'θ': '8',
+	    'ι': 'i', 'κ': 'k', 'λ': 'l', 'μ': 'm', 'ν': 'n', 'ξ': '3', 'ο': 'o', 'π': 'p',
+	    'ρ': 'r', 'σ': 's', 'τ': 't', 'υ': 'y', 'φ': 'f', 'χ': 'x', 'ψ': 'ps', 'ω': 'w',
+	    'ά': 'a', 'έ': 'e', 'ί': 'i', 'ό': 'o', 'ύ': 'y', 'ή': 'h', 'ώ': 'w', 'ς': 's',
+	    'ϊ': 'i', 'ΰ': 'y', 'ϋ': 'y', 'ΐ': 'i',
+	    'Α': 'A', 'Β': 'B', 'Γ': 'G', 'Δ': 'D', 'Ε': 'E', 'Ζ': 'Z', 'Η': 'H', 'Θ': '8',
+	    'Ι': 'I', 'Κ': 'K', 'Λ': 'L', 'Μ': 'M', 'Ν': 'N', 'Ξ': '3', 'Ο': 'O', 'Π': 'P',
+	    'Ρ': 'R', 'Σ': 'S', 'Τ': 'T', 'Υ': 'Y', 'Φ': 'F', 'Χ': 'X', 'Ψ': 'PS', 'Ω': 'W',
+	    'Ά': 'A', 'Έ': 'E', 'Ί': 'I', 'Ό': 'O', 'Ύ': 'Y', 'Ή': 'H', 'Ώ': 'W', 'Ϊ': 'I',
+	    'Ϋ': 'Y',
+	    // turkish
+	    'ş': 's', 'Ş': 'S', 'ı': 'i', 'İ': 'I' }, _defineProperty(_charMap, "\xE7", 'c'), _defineProperty(_charMap, "\xC7", 'C'), _defineProperty(_charMap, "\xFC", 'u'), _defineProperty(_charMap, "\xDC", 'U'), _defineProperty(_charMap, "\xF6", 'o'), _defineProperty(_charMap, "\xD6", 'O'), _defineProperty(_charMap, 'ğ', 'g'), _defineProperty(_charMap, 'Ğ', 'G'), _defineProperty(_charMap, 'а', 'a'), _defineProperty(_charMap, 'б', 'b'), _defineProperty(_charMap, 'в', 'v'), _defineProperty(_charMap, 'г', 'g'), _defineProperty(_charMap, 'д', 'd'), _defineProperty(_charMap, 'е', 'e'), _defineProperty(_charMap, 'ё', 'yo'), _defineProperty(_charMap, 'ж', 'zh'), _defineProperty(_charMap, 'з', 'z'), _defineProperty(_charMap, 'и', 'i'), _defineProperty(_charMap, 'й', 'j'), _defineProperty(_charMap, 'к', 'k'), _defineProperty(_charMap, 'л', 'l'), _defineProperty(_charMap, 'м', 'm'), _defineProperty(_charMap, 'н', 'n'), _defineProperty(_charMap, 'о', 'o'), _defineProperty(_charMap, 'п', 'p'), _defineProperty(_charMap, 'р', 'r'), _defineProperty(_charMap, 'с', 's'), _defineProperty(_charMap, 'т', 't'), _defineProperty(_charMap, 'у', 'u'), _defineProperty(_charMap, 'ф', 'f'), _defineProperty(_charMap, 'х', 'h'), _defineProperty(_charMap, 'ц', 'c'), _defineProperty(_charMap, 'ч', 'ch'), _defineProperty(_charMap, 'ш', 'sh'), _defineProperty(_charMap, 'щ', 'sh'), _defineProperty(_charMap, 'ъ', 'u'), _defineProperty(_charMap, 'ы', 'y'), _defineProperty(_charMap, 'ь', ''), _defineProperty(_charMap, 'э', 'e'), _defineProperty(_charMap, 'ю', 'yu'), _defineProperty(_charMap, 'я', 'ya'), _defineProperty(_charMap, 'А', 'A'), _defineProperty(_charMap, 'Б', 'B'), _defineProperty(_charMap, 'В', 'V'), _defineProperty(_charMap, 'Г', 'G'), _defineProperty(_charMap, 'Д', 'D'), _defineProperty(_charMap, 'Е', 'E'), _defineProperty(_charMap, 'Ё', 'Yo'), _defineProperty(_charMap, 'Ж', 'Zh'), _defineProperty(_charMap, 'З', 'Z'), _defineProperty(_charMap, 'И', 'I'), _defineProperty(_charMap, 'Й', 'J'), _defineProperty(_charMap, 'К', 'K'), _defineProperty(_charMap, 'Л', 'L'), _defineProperty(_charMap, 'М', 'M'), _defineProperty(_charMap, 'Н', 'N'), _defineProperty(_charMap, 'О', 'O'), _defineProperty(_charMap, 'П', 'P'), _defineProperty(_charMap, 'Р', 'R'), _defineProperty(_charMap, 'С', 'S'), _defineProperty(_charMap, 'Т', 'T'), _defineProperty(_charMap, 'У', 'U'), _defineProperty(_charMap, 'Ф', 'F'), _defineProperty(_charMap, 'Х', 'H'), _defineProperty(_charMap, 'Ц', 'C'), _defineProperty(_charMap, 'Ч', 'Ch'), _defineProperty(_charMap, 'Ш', 'Sh'), _defineProperty(_charMap, 'Щ', 'Sh'), _defineProperty(_charMap, 'Ъ', 'U'), _defineProperty(_charMap, 'Ы', 'Y'), _defineProperty(_charMap, 'Ь', ''), _defineProperty(_charMap, 'Э', 'E'), _defineProperty(_charMap, 'Ю', 'Yu'), _defineProperty(_charMap, 'Я', 'Ya'), _defineProperty(_charMap, 'Є', 'Ye'), _defineProperty(_charMap, 'І', 'I'), _defineProperty(_charMap, 'Ї', 'Yi'), _defineProperty(_charMap, 'Ґ', 'G'), _defineProperty(_charMap, 'є', 'ye'), _defineProperty(_charMap, 'і', 'i'), _defineProperty(_charMap, 'ї', 'yi'), _defineProperty(_charMap, 'ґ', 'g'), _defineProperty(_charMap, 'č', 'c'), _defineProperty(_charMap, 'ď', 'd'), _defineProperty(_charMap, 'ě', 'e'), _defineProperty(_charMap, 'ň', 'n'), _defineProperty(_charMap, 'ř', 'r'), _defineProperty(_charMap, 'š', 's'), _defineProperty(_charMap, 'ť', 't'), _defineProperty(_charMap, 'ů', 'u'), _defineProperty(_charMap, 'ž', 'z'), _defineProperty(_charMap, 'Č', 'C'), _defineProperty(_charMap, 'Ď', 'D'), _defineProperty(_charMap, 'Ě', 'E'), _defineProperty(_charMap, 'Ň', 'N'), _defineProperty(_charMap, 'Ř', 'R'), _defineProperty(_charMap, 'Š', 'S'), _defineProperty(_charMap, 'Ť', 'T'), _defineProperty(_charMap, 'Ů', 'U'), _defineProperty(_charMap, 'Ž', 'Z'), _defineProperty(_charMap, 'ą', 'a'), _defineProperty(_charMap, 'ć', 'c'), _defineProperty(_charMap, 'ę', 'e'), _defineProperty(_charMap, 'ł', 'l'), _defineProperty(_charMap, 'ń', 'n'), _defineProperty(_charMap, "\xF3", 'o'), _defineProperty(_charMap, 'ś', 's'), _defineProperty(_charMap, 'ź', 'z'), _defineProperty(_charMap, 'ż', 'z'), _defineProperty(_charMap, 'Ą', 'A'), _defineProperty(_charMap, 'Ć', 'C'), _defineProperty(_charMap, 'Ę', 'e'), _defineProperty(_charMap, 'Ł', 'L'), _defineProperty(_charMap, 'Ń', 'N'), _defineProperty(_charMap, 'Ś', 'S'), _defineProperty(_charMap, 'Ź', 'Z'), _defineProperty(_charMap, 'Ż', 'Z'), _defineProperty(_charMap, 'ā', 'a'), _defineProperty(_charMap, "\u010D", 'c'), _defineProperty(_charMap, 'ē', 'e'), _defineProperty(_charMap, 'ģ', 'g'), _defineProperty(_charMap, 'ī', 'i'), _defineProperty(_charMap, 'ķ', 'k'), _defineProperty(_charMap, 'ļ', 'l'), _defineProperty(_charMap, 'ņ', 'n'), _defineProperty(_charMap, "\u0161", 's'), _defineProperty(_charMap, 'ū', 'u'), _defineProperty(_charMap, "\u017E", 'z'), _defineProperty(_charMap, 'Ā', 'A'), _defineProperty(_charMap, "\u010C", 'C'), _defineProperty(_charMap, 'Ē', 'E'), _defineProperty(_charMap, 'Ģ', 'G'), _defineProperty(_charMap, 'Ī', 'i'), _defineProperty(_charMap, 'Ķ', 'k'), _defineProperty(_charMap, 'Ļ', 'L'), _defineProperty(_charMap, 'Ņ', 'N'), _defineProperty(_charMap, "\u0160", 'S'), _defineProperty(_charMap, 'Ū', 'u'), _defineProperty(_charMap, "\u017D", 'Z'), _defineProperty(_charMap, '€', 'euro'), _defineProperty(_charMap, '₢', 'cruzeiro'), _defineProperty(_charMap, '₣', 'french franc'), _defineProperty(_charMap, '£', 'pound'), _defineProperty(_charMap, '₤', 'lira'), _defineProperty(_charMap, '₥', 'mill'), _defineProperty(_charMap, '₦', 'naira'), _defineProperty(_charMap, '₧', 'peseta'), _defineProperty(_charMap, '₨', 'rupee'), _defineProperty(_charMap, '₩', 'won'), _defineProperty(_charMap, '₪', 'new shequel'), _defineProperty(_charMap, '₫', 'dong'), _defineProperty(_charMap, '₭', 'kip'), _defineProperty(_charMap, '₮', 'tugrik'), _defineProperty(_charMap, '₯', 'drachma'), _defineProperty(_charMap, '₰', 'penny'), _defineProperty(_charMap, '₱', 'peso'), _defineProperty(_charMap, '₲', 'guarani'), _defineProperty(_charMap, '₳', 'austral'), _defineProperty(_charMap, '₴', 'hryvnia'), _defineProperty(_charMap, '₵', 'cedi'), _defineProperty(_charMap, '¢', 'cent'), _defineProperty(_charMap, '¥', 'yen'), _defineProperty(_charMap, '元', 'yuan'), _defineProperty(_charMap, '円', 'yen'), _defineProperty(_charMap, '﷼', 'rial'), _defineProperty(_charMap, '₠', 'ecu'), _defineProperty(_charMap, '¤', 'currency'), _defineProperty(_charMap, '฿', 'baht'), _defineProperty(_charMap, '$', 'dollar'), _defineProperty(_charMap, '©', '(c)'), _defineProperty(_charMap, 'œ', 'oe'), _defineProperty(_charMap, 'Œ', 'OE'), _defineProperty(_charMap, '∑', 'sum'), _defineProperty(_charMap, '®', '(r)'), _defineProperty(_charMap, '†', '+'), _defineProperty(_charMap, '“', '"'), _defineProperty(_charMap, '”', '"'), _defineProperty(_charMap, '‘', "'"), _defineProperty(_charMap, '’', "'"), _defineProperty(_charMap, '∂', 'd'), _defineProperty(_charMap, 'ƒ', 'f'), _defineProperty(_charMap, '™', 'tm'), _defineProperty(_charMap, '℠', 'sm'), _defineProperty(_charMap, '…', '...'), _defineProperty(_charMap, '˚', 'o'), _defineProperty(_charMap, 'º', 'o'), _defineProperty(_charMap, 'ª', 'a'), _defineProperty(_charMap, '•', '*'), _defineProperty(_charMap, '∆', 'delta'), _defineProperty(_charMap, '∞', 'infinity'), _defineProperty(_charMap, '♥', 'love'), _defineProperty(_charMap, '&', 'and'), _defineProperty(_charMap, '|', 'or'), _defineProperty(_charMap, '<', 'less'), _defineProperty(_charMap, '>', 'greater'), _charMap);
+	function slugify(str) {
+	    var replacement = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '-';
 
-/***/ },
-/* 12 */
-/***/ function(module, exports, __webpack_require__) {
+	    return str.split('').reduce(function (result, ch) {
+	        if (charMap[ch]) {
+	            ch = charMap[ch];
+	        }
+	        // allowed
+	        ch = ch.replace(/[^\w\s$*_+~.()'"!\-:@]/g, '');
+	        result += ch;
+	        return result;
+	    }, '').replace(/^\s+|\s+$/g, '').replace(/[-\s]+/g, replacement).replace('#{replacement}$', '');
+	}
+	exports.slugify = slugify;
+	function extendSlugChar(customMap) {
+	    for (var key in customMap) {
+	        charMap[key] = customMap[key];
+	    }
+	}
+	exports.extendSlugChar = extendSlugChar;
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
 
@@ -1523,6 +1358,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+	Object.defineProperty(exports, "__esModule", { value: true });
 	var orange_1 = __webpack_require__(3);
 	var props = ['name', 'mime', 'size', 'ctime', 'mtime', 'mode', 'gid', 'uid', 'meta', 'path', 'is_dir', 'hidden', 'id'];
 
@@ -1530,7 +1366,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _createClass(FileInfo, [{
 	        key: "fullPath",
 	        get: function get() {
-	            return this.path + this.name;
+	            if (!this.path) return this.name;
+	            return this.path + (this.path[this.path.length - 1] === '/' ? '' : '/') + this.name;
 	        }
 	    }]);
 
@@ -1563,7 +1400,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    _createClass(FileInfo, [{
 	        key: "toString",
 	        value: function toString() {
-	            return "FileInfo(name=" + this.name + ", mime=" + this.mime + ")";
+	            return "FileInfo(name=" + this.name + ", mime=" + this.mime + ", size=" + this.size + ")";
+	        }
+	    }, {
+	        key: "toJSON",
+	        value: function toJSON() {
+	            return orange_1.pick(this, props);
 	        }
 	    }]);
 
@@ -1572,9 +1414,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	exports.FileInfo = FileInfo;
 
-/***/ },
-/* 13 */
-/***/ function(module, exports) {
+/***/ }),
+/* 12 */
+/***/ (function(module, exports) {
 
 	"use strict";
 
@@ -1586,6 +1428,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+	Object.defineProperty(exports, "__esModule", { value: true });
 	var ErrorCode;
 	(function (ErrorCode) {
 	    ErrorCode[ErrorCode["AlreadyExists"] = 409] = "AlreadyExists";
@@ -1655,14 +1498,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	exports.createError = createError;
 
-/***/ },
-/* 14 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 13 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
 
-	var orange_request_1 = __webpack_require__(15);
-	var utils_1 = __webpack_require__(11);
+	Object.defineProperty(exports, "__esModule", { value: true });
+	var orange_request_1 = __webpack_require__(14);
+	var utils_1 = __webpack_require__(10);
 	function request(method, url, r) {
 	    var req = new orange_request_1.HttpRequest(method, url);
 	    if (r.params) req.params(r.params);
@@ -1713,9 +1557,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return req.end(data);
 	}
 
-/***/ },
-/* 15 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 14 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
 
@@ -1732,8 +1576,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (!exports.hasOwnProperty(p)) exports[p] = m[p];
 	    }
 	}
-	var base_http_request_1 = __webpack_require__(16);
-	var browser_fetch_1 = __webpack_require__(20);
+	var base_http_request_1 = __webpack_require__(15);
+	var browser_fetch_1 = __webpack_require__(19);
 
 	var HttpRequest = function (_base_http_request_1$) {
 	    _inherits(HttpRequest, _base_http_request_1$);
@@ -1755,18 +1599,18 @@ return /******/ (function(modules) { // webpackBootstrap
 	}(base_http_request_1.BaseHttpRequest);
 
 	exports.HttpRequest = HttpRequest;
-	var utils_1 = __webpack_require__(17);
+	var utils_1 = __webpack_require__(16);
 	exports.queryStringToParams = utils_1.queryStringToParams;
 	exports.isValid = utils_1.isValid;
 	exports.isNode = utils_1.isNode;
 	exports.queryParam = utils_1.queryParam;
-	__export(__webpack_require__(21));
-	__export(__webpack_require__(18));
-	__export(__webpack_require__(23));
-	var base_http_request_2 = __webpack_require__(16);
+	__export(__webpack_require__(20));
+	__export(__webpack_require__(17));
+	__export(__webpack_require__(22));
+	var base_http_request_2 = __webpack_require__(15);
 	exports.HttpMethod = base_http_request_2.HttpMethod;
 	exports.HttpError = base_http_request_2.HttpError;
-	var base_http_request_3 = __webpack_require__(16);
+	var base_http_request_3 = __webpack_require__(15);
 	function get(url) {
 	    return new HttpRequest(base_http_request_3.HttpMethod.GET, url);
 	}
@@ -1792,9 +1636,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	exports.head = head;
 
-/***/ },
-/* 16 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 15 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
 
@@ -1807,8 +1651,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 	var orange_1 = __webpack_require__(3);
-	var utils_1 = __webpack_require__(17);
-	var header_1 = __webpack_require__(18);
+	var utils_1 = __webpack_require__(16);
+	var header_1 = __webpack_require__(17);
 	(function (HttpMethod) {
 	    HttpMethod[HttpMethod["GET"] = 0] = "GET";
 	    HttpMethod[HttpMethod["PUT"] = 1] = "PUT";
@@ -1972,9 +1816,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	exports.BaseHttpRequest = BaseHttpRequest;
 
-/***/ },
-/* 17 */
-/***/ function(module, exports) {
+/***/ }),
+/* 16 */
+/***/ (function(module, exports) {
 
 	"use strict";
 
@@ -2016,9 +1860,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.isValid = isValid;
 	;
 
-/***/ },
-/* 18 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 17 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
 
@@ -2026,7 +1870,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	var support_1 = __webpack_require__(19);
+	var support_1 = __webpack_require__(18);
 	function normalizeName(name) {
 	    if (typeof name !== 'string') {
 	        name = String(name);
@@ -2169,13 +2013,13 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	exports.Headers = Headers;
 
-/***/ },
-/* 19 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 18 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
 
-	var utils_1 = __webpack_require__(17);
+	var utils_1 = __webpack_require__(16);
 	var self = utils_1.isNode ? global : window;
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.default = {
@@ -2193,9 +2037,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    arrayBuffer: 'ArrayBuffer' in self
 	};
 
-/***/ },
-/* 20 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 19 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
 
@@ -2208,10 +2052,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 	var orange_1 = __webpack_require__(3);
-	var header_1 = __webpack_require__(18);
-	var request_1 = __webpack_require__(21);
-	var base_response_1 = __webpack_require__(22);
-	var support_1 = __webpack_require__(19);
+	var header_1 = __webpack_require__(17);
+	var request_1 = __webpack_require__(20);
+	var base_response_1 = __webpack_require__(21);
+	var support_1 = __webpack_require__(18);
 	function headers(xhr) {
 	    var head = new header_1.Headers();
 	    var pairs = (xhr.getAllResponseHeaders() || '').trim().split('\n');
@@ -2305,9 +2149,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	exports.fetch = fetch;
 
-/***/ },
-/* 21 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 20 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
 
@@ -2315,7 +2159,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	var header_1 = __webpack_require__(18);
+	var header_1 = __webpack_require__(17);
 	// HTTP methods whose capitalization should be normalized
 	var methods = ['DELETE', 'GET', 'HEAD', 'OPTIONS', 'POST', 'PUT'];
 	function normalizeMethod(method) {
@@ -2371,9 +2215,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	exports.Request = Request;
 
-/***/ },
-/* 22 */
-/***/ function(module, exports, __webpack_require__) {
+/***/ }),
+/* 21 */
+/***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
 
@@ -2381,11 +2225,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	var header_1 = __webpack_require__(18);
-	var support_1 = __webpack_require__(19);
+	var header_1 = __webpack_require__(17);
+	var support_1 = __webpack_require__(18);
 	var orange_1 = __webpack_require__(3);
-	var utils_1 = __webpack_require__(17);
-	var types_1 = __webpack_require__(23);
+	var utils_1 = __webpack_require__(16);
+	var types_1 = __webpack_require__(22);
 	function decode(body) {
 	    var form = new FormData();
 	    body.trim().split('&').forEach(function (bytes) {
@@ -2551,9 +2395,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	exports.BaseResponse = BaseResponse;
 
-/***/ },
-/* 23 */
-/***/ function(module, exports) {
+/***/ }),
+/* 22 */
+/***/ (function(module, exports) {
 
 	"use strict";
 
@@ -2567,7 +2411,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var BodyType = exports.BodyType;
 	;
 
-/***/ }
+/***/ })
 /******/ ])
 });
 ;

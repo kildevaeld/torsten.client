@@ -1,4 +1,5 @@
 import { IPromise } from 'orange';
+export { isObject, isString, isFunction } from 'orange';
 export declare class Buffer {
     static isBuffer(a: any): boolean;
     length: number;
@@ -6,7 +7,6 @@ export declare class Buffer {
 export declare class ReadableStream {
 }
 export declare const isNode: boolean;
-export { isObject, isString, isFunction } from 'orange';
 export declare function isBuffer(a: any): a is Buffer;
 export declare function isFormData(a: any): a is FormData;
 export declare function isReadableStream(a: any): a is ReadableStream;
@@ -24,3 +24,7 @@ export declare module path {
 export declare module filemode {
     function toString(m: number): string;
 }
+export declare function slugify(str: string, replacement?: string): string;
+export declare function extendSlugChar(customMap: {
+    [key: string]: string;
+}): void;

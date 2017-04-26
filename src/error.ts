@@ -5,7 +5,6 @@ export enum ErrorCode {
     NotFound = 404,
     Unauthorized = 401,
     Unknown = 500,
-
     NullData = 600
 }
 

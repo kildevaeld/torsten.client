@@ -4,7 +4,7 @@ import {
     constants
 } from './types';
 import { extend } from 'orange';
-import { isNode } from './utils';
+import { isNode, slugify } from './utils';
 import { FileInfo } from './file-info';
 import { createError, TorstenJSONError, ErrorCode } from './error';
 
@@ -17,11 +17,9 @@ interface IMessage {
     data?: any;
 }
 
-
 function validateConfig(options: TorstenClientOptions) {
     if (options == null) throw createError(0, "options");
     if (options.endpoint == null) throw createError(0, "needs endpoint");
-
 }
 
 
@@ -48,8 +46,19 @@ export class TorstenClient implements IClient {
         return this._options.endpoint;
     }
 
+    /**
+     * Add new file
+     * 
+     * @param {string} path 
+     * @param {*} data 
+     * @param {CreateOptions} [options={}] 
+     * @returns {Promise<FileInfo>} 
+     * 
+     * @memberOf TorstenClient
+     */
     create(path: string, data: any, options: CreateOptions = {}): Promise<FileInfo> {
         this._check_token();
+        
         if (data == null) return Promise.reject<FileInfo>(createError(ErrorCode.NullData, "no data"))
 
         let req: request.TorstenRequest = extend({}, options, {
@@ -65,6 +74,8 @@ export class TorstenClient implements IClient {
             (req.params = req.params || {}).meta = JSON.stringify(options.meta);
         }
 
+        path = slugify(path);
+
         return request.request(HttpMethod.POST, this._toUrl(path), req)
             .then(getResponse)
             .then(res => res.json<IMessage>())
@@ -76,8 +87,15 @@ export class TorstenClient implements IClient {
             })
     }
 
-
-
+    /**
+     * Stat returns the file info from path
+     * 
+     * @param {string} path 
+     * @param {GetOptions} [options={}] 
+     * @returns {Promise<FileInfo>} 
+     * 
+     * @memberOf TorstenClient
+     */
     stat(path: string, options: GetOptions = {}): Promise<FileInfo> {
         this._check_token();
 
@@ -92,6 +110,15 @@ export class TorstenClient implements IClient {
 
     }
 
+    /**
+     * StatById return the file info from id
+     * 
+     * @param {string} id 
+     * @param {GetOptions} [options={}] 
+     * @returns {Promise<FileInfo>} 
+     * 
+     * @memberOf TorstenClient
+     */
     statById(id: string, options: GetOptions = {}): Promise<FileInfo> {
         this._check_token();
 
@@ -117,7 +144,17 @@ export class TorstenClient implements IClient {
         })
     }
 
-
+    /**
+     * Open opens a file for reading. 
+     * When running on node a ReadableStream will be returned
+     * A blob when running in the browser
+     * 
+     * @param {(string | FileInfo)} path 
+     * @param {OpenOptions} [options={}] 
+     * @returns {Promise<any>} 
+     * 
+     * @memberOf TorstenClient
+     */
     open(path: string | FileInfo, options: OpenOptions = {}): Promise<any> {
         this._check_token();
 
@@ -141,6 +178,14 @@ export class TorstenClient implements IClient {
             .then(r => isNode ? r.stream() : r.blob())
     }
 
+    /**
+     * Remove a file at path
+     * 
+     * @param {string} path 
+     * @returns {Promise<TorstenResponse>} 
+     * 
+     * @memberOf TorstenClient
+     */
     remove(path: string): Promise<TorstenResponse> {
         this._check_token();
         let url = this._toUrl(path)

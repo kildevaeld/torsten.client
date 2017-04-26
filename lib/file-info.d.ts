@@ -16,4 +16,5 @@ export declare class FileInfo implements IFileInfo {
     readonly fullPath: string;
     constructor(attr?: any);
     toString(): string;
+    toJSON(): any;
 }
