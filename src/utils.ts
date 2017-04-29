@@ -202,7 +202,7 @@ export function slugify(str: string, replacement = '-') {
             ch = charMap[ch]
         }
         // allowed
-        ch = ch.replace(/[^\w\s$*_+~.()'"!\-:@]/g, '')
+        ch = ch.replace(/[^\w\s$*_+~.()'"!\-:@\/]/g, '')
         result += ch
         return result
     }, '')

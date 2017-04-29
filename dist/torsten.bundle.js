@@ -1335,7 +1335,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            ch = charMap[ch];
 	        }
 	        // allowed
-	        ch = ch.replace(/[^\w\s$*_+~.()'"!\-:@]/g, '');
+	        ch = ch.replace(/[^\w\s$*_+~.()'"!\-:@\/]/g, '');
 	        result += ch;
 	        return result;
 	    }, '').replace(/^\s+|\s+$/g, '').replace(/[-\s]+/g, replacement).replace('#{replacement}$', '');
