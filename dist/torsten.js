@@ -71,6 +71,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.readBlobAsDataURL = utils_1.readBlobAsDataURL;
 	exports.path = utils_1.path;
 	__export(__webpack_require__(5));
+	exports.version = "0.2.7";
 
 /***/ }),
 /* 1 */

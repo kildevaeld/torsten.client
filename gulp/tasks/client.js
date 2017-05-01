@@ -100,6 +100,11 @@ gulp.task('webpack:bundle', ['typescript'], () => {
         })).pipe(gulp.dest('dist'))
 });
 
+const gulpIf = require('gulp-if'),
+     replace = require('gulp-replace'),
+     Path = require('path'),
+     pkgjson = require(Path.join(process.cwd(), 'package.json'));
+
 gulp.task('typescript', () => {
     var project = tsc.createProject('tsconfig.json', {
         typescript: require('typescript')
@@ -107,11 +112,14 @@ gulp.task('typescript', () => {
 
     let p = project.src()
         .pipe(project())
+        
 
     let js = p.js
         .pipe(babel({
             presets: ['es2015']
         }))
+        .pipe(gulpIf( file => Path.basename(file.path) == 'index.js', 
+            replace('@version@', pkgjson.version)))
 
 
     return merge([

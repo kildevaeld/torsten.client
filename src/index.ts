@@ -7,6 +7,7 @@ export {
     readBlobAsDataURL, path
 } from './utils';
 
-export * from './file-info'
+export * from './file-info';
 
+export const version = "@version@";
 
